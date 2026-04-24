@@ -25,16 +25,20 @@ export async function signup(data) {
   return res.json();
 }
 
-export async function verify2fa(data) {
+export async function verify2fa(answer) {
   const res = await fetch(`${API_URL}?action=verify2fa`, {
     method: "POST",
     credentials: "include",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ answer }),
   });
+  return res.json();
+}
 
+export async function getSecurityQuestion() {
+  const res = await fetch(`${API_URL}?action=getSecurityQuestion`, {
+    credentials: "include",
+  });
   return res.json();
 }
 

@@ -36,8 +36,8 @@ function login()
 
     // LOG: user not found
     if (!$user) {
-        log_attempt($conn, $user["u_id"], $email, 0);
-        return json_response(false, "Invalid credentials");
+        log_attempt($conn, null, $email, 0);  // null, not $user["u_id"]
+        return json_response(false, "Incorrect email or password");
     }
 
     // CHECK LOCKOUT
@@ -66,8 +66,7 @@ function login()
         $update->execute();
 
         log_attempt($conn, $user["u_id"], $email, 0);
-
-        return json_response(false, "Invalid password");
+        return json_response(false, "Incorrect email or password");
     }
 
     // SUCCESS LOGIN → reset security counters
@@ -94,11 +93,11 @@ function signup()
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    $email    = $data["email"]             ?? "";
-    $password = $data["password"]          ?? "";
+    $email = $data["email"] ?? "";
+    $password = $data["password"] ?? "";
     $question = $data["security_question"] ?? "";
-    $answer   = $data["security_answer"]   ?? "";
-    $hint     = $data["security_hint"]     ?? "";
+    $answer = $data["security_answer"] ?? "";
+    $hint = $data["security_hint"] ?? "";
 
     if (!$email || !$password || !$question || !$answer) {
         return json_response(false, "Missing fields");
@@ -112,7 +111,7 @@ function signup()
     // ---------------------------------
 
     $hashedPassword = hash_password($password);
-    $hashedAnswer   = hash_password($answer);
+    $hashedAnswer = hash_password($answer);
 
     $stmt = $conn->prepare("
         INSERT INTO users (u_email, u_password, u_role, u_security_question, u_security_answer, u_security_hint)
@@ -173,8 +172,7 @@ function verify_security_question()
     global $conn;
 
     $data = json_decode(file_get_contents("php://input"), true);
-
-    $answer = $data ?? "";
+    $answer = $data["answer"] ?? "";
 
     if (!isset($_SESSION["pending_user"])) {
         return json_response(false, "No pending authentication");
@@ -207,5 +205,29 @@ function verify_security_question()
 
     return json_response(true, "2FA success", [
         "role" => $user["u_role"]
+    ]);
+}
+
+// ---------------- GET SECURITY QUESTION ----------------
+
+function get_security_question()
+{
+    if (!isset($_SESSION["pending_user"])) {
+        return json_response(false, "No pending authentication");
+    }
+
+    global $conn;
+    $stmt = $conn->prepare("SELECT u_security_question, u_security_hint FROM users WHERE u_id = ?");
+    $stmt->bind_param("i", $_SESSION["pending_user"]);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+
+    if (!$user) {
+        return json_response(false, "User not found");
+    }
+
+    return json_response(true, "OK", [
+        "question" => $user["u_security_question"],
+        "hint" => $user["u_security_hint"],
     ]);
 }

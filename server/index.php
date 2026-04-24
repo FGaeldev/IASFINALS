@@ -21,35 +21,30 @@ switch ($action) {
     case "login":
         login();
         break;
-
     case "verify2fa":
         verify_security_question();
         break;
-
     case "signup":
         signup();
         break;
-
+    case "getSecurityQuestion":
+        get_security_question();
+        break;
     case "me":
         me();
         break;
-
     case "logout":
         logout();
         break;
-
     case "users":
         get_users();
         break;
-
     case "loginLogs":
         get_login_logs();
         break;
-
     case "sessionLogs":
         get_session_logs();
         break;
-
     default:
         echo json_encode(["success" => false, "message" => "Invalid route"]);
 }
