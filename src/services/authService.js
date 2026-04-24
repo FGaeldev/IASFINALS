@@ -1,0 +1,76 @@
+const API_URL = "http://localhost/IAS/esmeralda/server/index.php"; // Server Access Point
+
+export async function login(email, password) {
+  const res = await fetch(`${API_URL}?action=login`, {
+    method: "POST",
+    credentials: "include", // IMPORTANT for PHP sessions
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  return res.json();
+}
+
+export async function signup(data) {
+  const res = await fetch(`${API_URL}?action=signup`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+}
+
+export async function verify2fa(data) {
+  const res = await fetch(`${API_URL}?action=verify2fa`, {
+    method: "POST",
+    credentials: "include",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(data),
+  });
+
+  return res.json();
+}
+
+export async function getMe() {
+  const res = await fetch(`${API_URL}/routes/auth.php?action=me`, {
+    credentials: "include",
+  });
+
+  return res.json();
+}
+
+export async function logout() {
+  const res = await fetch(`${API_URL}/routes/auth.php?action=logout`, {
+    credentials: "include",
+  });
+
+  return res.json();
+}
+
+export async function getUsers() {
+  const res = await fetch(`${API_URL}?action=users`, {
+    credentials: "include",
+  });
+  return res.json();
+}
+
+export async function getLoginLogs() {
+  const res = await fetch(`${API_URL}?action=loginLogs`, {
+    credentials: "include",
+  });
+  return res.json();
+}
+
+export async function getSessionLogs() {
+  const res = await fetch(`${API_URL}?action=sessionLogs`, {
+    credentials: "include",
+  });
+  return res.json();
+}
