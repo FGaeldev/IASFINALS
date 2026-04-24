@@ -94,24 +94,30 @@ function signup()
 
     $data = json_decode(file_get_contents("php://input"), true);
 
-    $email = $data["email"] ?? "";
-    $password = $data["password"] ?? "";
+    $email    = $data["email"]             ?? "";
+    $password = $data["password"]          ?? "";
     $question = $data["security_question"] ?? "";
-    $answer = $data["security_answer"] ?? "";
-    $hint = $data["security_hint"] ?? "";
+    $answer   = $data["security_answer"]   ?? "";
+    $hint     = $data["security_hint"]     ?? "";
 
     if (!$email || !$password || !$question || !$answer) {
         return json_response(false, "Missing fields");
     }
 
+    // ---- PASSWORD STRENGTH CHECK ----
+    $pw_errors = password_errors($password);
+    if (!empty($pw_errors)) {
+        return json_response(false, implode(" ", $pw_errors));
+    }
+    // ---------------------------------
+
     $hashedPassword = hash_password($password);
-    $hashedAnswer = hash_password($answer);
+    $hashedAnswer   = hash_password($answer);
 
     $stmt = $conn->prepare("
         INSERT INTO users (u_email, u_password, u_role, u_security_question, u_security_answer, u_security_hint)
         VALUES (?, ?, 'user', ?, ?, ?)
     ");
-
     $stmt->bind_param("sssss", $email, $hashedPassword, $question, $hashedAnswer, $hint);
 
     if ($stmt->execute()) {
