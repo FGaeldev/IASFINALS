@@ -197,7 +197,7 @@ function verify_security_question()
     }
 
     // FINAL LOGIN SUCCESS
-    
+
     // --- CONCURRENT SESSION ENFORCEMENT ---
     // Close any existing active sessions for this user
     $close = $conn->prepare("
@@ -242,4 +242,51 @@ function get_security_question()
         "question" => $user["u_security_question"],
         "hint" => $user["u_security_hint"],
     ]);
+}
+
+// ---------------- GET PROFILE ----------------
+
+function get_profile()
+{
+    require_auth();
+    global $conn;
+
+    $stmt = $conn->prepare("
+        SELECT u_email, u_security_question, u_security_hint
+        FROM users WHERE u_id = ?
+    ");
+    $stmt->bind_param("i", $_SESSION["user_id"]);
+    $stmt->execute();
+    $user = $stmt->get_result()->fetch_assoc();
+
+    json_response(true, "OK", $user);
+}
+
+// ---------------- UPDATE 2FA ----------------
+
+function update_2fa()
+{
+    require_auth();
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $question = $data["security_question"] ?? "";
+    $answer = $data["security_answer"] ?? "";
+    $hint = $data["security_hint"] ?? "";
+
+    if (!$question || !$answer) {
+        return json_response(false, "Question and answer required");
+    }
+
+    $hashed = hash_password($answer);
+
+    $stmt = $conn->prepare("
+        UPDATE users
+        SET u_security_question = ?, u_security_answer = ?, u_security_hint = ?
+        WHERE u_id = ?
+    ");
+    $stmt->bind_param("sssi", $question, $hashed, $hint, $_SESSION["user_id"]);
+    $stmt->execute();
+
+    json_response(true, "Security question updated");
 }

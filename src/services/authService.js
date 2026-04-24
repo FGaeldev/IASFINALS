@@ -43,7 +43,7 @@ export async function getSecurityQuestion() {
 }
 
 export async function getMe() {
-  const res = await fetch(`${API_URL}/routes/auth.php?action=me`, {
+  const res = await fetch(`${API_URL}?action=me`, {
     credentials: "include",
   });
 
@@ -51,7 +51,7 @@ export async function getMe() {
 }
 
 export async function logout() {
-  const res = await fetch(`${API_URL}/routes/auth.php?action=logout`, {
+  const res = await fetch(`${API_URL}?action=logout`, {
     credentials: "include",
   });
 
@@ -95,6 +95,23 @@ export async function deleteUser(userId) {
     credentials: "include",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ id: userId }),
+  });
+  return res.json();
+}
+
+export async function getProfile() {
+  const res = await fetch(`${API_URL}?action=profile`, {
+    credentials: "include",
+  });
+  return res.json();
+}
+
+export async function update2fa(data) {
+  const res = await fetch(`${API_URL}?action=update2fa`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
   });
   return res.json();
 }

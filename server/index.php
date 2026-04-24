@@ -52,5 +52,11 @@ switch ($action) {
         delete_user();
         break;
     default:
+    case "profile":
+        get_profile();
+        break;
+    case "update2fa":
+        update_2fa();
+        break;
         echo json_encode(["success" => false, "message" => "Invalid route"]);
 }

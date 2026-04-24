@@ -1,8 +1,6 @@
-// Dependencies
 import { Routes, Route } from "react-router-dom";
 import ProtectedRoute from "./components/ProtectedRoute";
 
-// Pages
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Signup from "./pages/Signup";
@@ -21,6 +19,7 @@ export default function App() {
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/security-question" element={<SecurityQuestion />} />
+
         <Route
           path="/user"
           element={
@@ -37,7 +36,17 @@ export default function App() {
             </ProtectedRoute>
           }
         />
-        {/* catch-all route */}
+
+        {/* Profile — both roles */}
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute role={["user", "admin"]}>
+              <UserDashboard />
+            </ProtectedRoute>
+          }
+        />
+
         <Route path="*" element={<NotFound />} />
       </Routes>
     </>
