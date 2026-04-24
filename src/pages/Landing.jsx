@@ -13,15 +13,15 @@ export default function Landing() {
       {/* content */}
       <div className="relative text-center text-white px-6">
         <span className="block text-4xl md:text-6xl font-bold mb-3">
-          Welcome to My System
+          User Management System
         </span>
 
         <span className="block text-lg md:text-2xl mb-2 text-gray-200">
-          Secure Role-Based Authentication
+          By: Vince Timothy Esmeralda 
         </span>
 
         <span className="block text-sm md:text-lg text-gray-300">
-          React • PHP • MySQL • Session Security
+          For: Information Assurance and Security 1
         </span>
       </div>
     </div>
