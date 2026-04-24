@@ -78,3 +78,23 @@ export async function getSessionLogs() {
   });
   return res.json();
 }
+
+export async function updateUserRole(userId, role) {
+  const res = await fetch(`${API_URL}?action=updateRole`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: userId, role }),
+  });
+  return res.json();
+}
+
+export async function deleteUser(userId) {
+  const res = await fetch(`${API_URL}?action=deleteUser`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ id: userId }),
+  });
+  return res.json();
+}

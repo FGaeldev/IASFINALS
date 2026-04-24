@@ -45,6 +45,12 @@ switch ($action) {
     case "sessionLogs":
         get_session_logs();
         break;
+    case "updateRole":
+        update_role();
+        break;
+    case "deleteUser":
+        delete_user();
+        break;
     default:
         echo json_encode(["success" => false, "message" => "Invalid route"]);
 }

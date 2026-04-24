@@ -73,3 +73,46 @@ function get_session_logs()
 
     json_response(true, "Session logs fetched", $logs);
 }
+
+// ---------------- UPDATE ROLE ----------------
+function update_role()
+{
+    require_role("admin");
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $id   = $data["id"]   ?? null;
+    $role = $data["role"] ?? null;
+
+    if (!$id || !in_array($role, ["user", "admin"])) {
+        return json_response(false, "Invalid input");
+    }
+    if ($id == $_SESSION["user_id"]) {          // fixed: u_id → user_id
+        return json_response(false, "Cannot change own role");
+    }
+
+    $stmt = $conn->prepare("UPDATE users SET u_role = ? WHERE u_id = ?");
+    $stmt->bind_param("si", $role, $id);
+    $stmt->execute();
+    json_response(true, "Role updated");
+}
+
+// ---------------- DELETE USER ----------------
+function delete_user()
+{
+    require_role("admin");
+    global $conn;
+
+    $data = json_decode(file_get_contents("php://input"), true);
+    $id   = $data["id"] ?? null;
+
+    if (!$id) return json_response(false, "Missing ID");
+    if ($id == $_SESSION["user_id"]) {          // fixed: u_id → user_id
+        return json_response(false, "Cannot delete own account");
+    }
+
+    $stmt = $conn->prepare("DELETE FROM users WHERE u_id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    json_response(true, "User deleted");
+}
