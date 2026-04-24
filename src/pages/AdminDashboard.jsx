@@ -35,7 +35,7 @@ export default function AdminDashboard() {
     <div
       className="min-h-screen bg-cover bg-center flex flex-col p-6"
       style={{
-        backgroundImage: "url('./public/background.jpg')",
+        backgroundImage: "url('/background.jpg')",
       }}
     >
       {/* overlay */}

@@ -47,7 +47,7 @@ export default function Signup() {
   return (
     <div
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
-      style={{ backgroundImage: "url('./public/background.jpg')" }}
+      style={{ backgroundImage: "url('/background.jpg')" }}
     >
       <div className="absolute inset-0 bg-black/60"></div>
       <div className="relative w-full max-w-md mx-4 p-8 rounded-2xl bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg text-white">

@@ -4,7 +4,7 @@ export default function Landing() {
       className="relative min-h-screen bg-cover bg-center flex items-center justify-center"
       style={{
         backgroundImage:
-          "url('./public/background.jpg')",
+          "url('/background.jpg')",
       }}
     >
       {/* dark overlay */}

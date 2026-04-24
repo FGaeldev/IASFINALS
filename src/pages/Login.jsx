@@ -22,7 +22,7 @@ export default function Login() {
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{
         backgroundImage:
-          "url('./public/background.jpg')",
+          "url('/background.jpg')",
       }}
     >
       {/* overlay */}

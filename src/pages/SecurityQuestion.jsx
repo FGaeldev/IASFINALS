@@ -26,7 +26,7 @@ export default function SecurityQuestion() {
     <div
       className="relative min-h-screen flex items-center justify-center bg-cover bg-center"
       style={{
-        backgroundImage: "url('./public/background.jpg')",
+        backgroundImage: "url('/background.jpg')",
       }}
     >
       {/* overlay */}
