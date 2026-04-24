@@ -1,7 +1,11 @@
 <?php
+ini_set('session.cookie_secure', 1);     // HTTPS only
+ini_set('session.cookie_httponly', 1);   // no JS access
+ini_set('session.cookie_samesite', 'Strict');
+
 session_start();
 
-header("Access-Control-Allow-Origin: http://localhost:5173");
+header("Access-Control-Allow-Origin: https://esmeralda.augusta2026.online");
 header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");

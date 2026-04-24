@@ -1,9 +1,9 @@
 <?php
 
 $host = "localhost";
-$user = "root";
-$pass = "";
-$db   = "db_ias_esmeralda";
+$user = "u945996889_esmeralda";
+$pass = "AugustaEsmeralda123!";
+$db   = "u945996889_ias_esmeralda";
 
 $conn = new mysqli($host, $user, $pass, $db);
 

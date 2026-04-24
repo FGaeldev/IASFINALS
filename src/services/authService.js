@@ -1,4 +1,4 @@
-const API_URL = "http://localhost/IAS/esmeralda/server/index.php"; // Server Access Point
+const API_URL = "https://esmeralda.augusta2026.online/server/index.php"; // Server Access Point
 
 export async function login(email, password) {
   const res = await fetch(`${API_URL}?action=login`, {
