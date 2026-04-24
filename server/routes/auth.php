@@ -197,10 +197,22 @@ function verify_security_question()
     }
 
     // FINAL LOGIN SUCCESS
+    
+    // --- CONCURRENT SESSION ENFORCEMENT ---
+    // Close any existing active sessions for this user
+    $close = $conn->prepare("
+    UPDATE session_logs
+    SET s_logout_time = NOW()
+    WHERE s_user_id = ? AND s_logout_time IS NULL
+");
+    $close->bind_param("i", $user["u_id"]);
+    $close->execute();
+    // --------------------------------------
+
     $_SESSION["user_id"] = $user["u_id"];
     $_SESSION["role"] = $user["u_role"];
-    logSessionStart($user['u_id']);
 
+    logSessionStart($user['u_id']);
     unset($_SESSION["pending_user"]);
 
     return json_response(true, "2FA success", [
