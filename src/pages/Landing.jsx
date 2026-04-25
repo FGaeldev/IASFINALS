@@ -17,7 +17,7 @@ export default function Landing() {
         </span>
 
         <span className="block text-lg md:text-2xl mb-2 text-gray-200">
-          By: Vince Timothy Esmeralda 
+          By: Isaac Psalm Inamac 
         </span>
 
         <span className="block text-sm md:text-lg text-gray-300">
