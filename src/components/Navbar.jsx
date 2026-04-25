@@ -3,6 +3,9 @@ import { NavLink } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { logout } from "../services/authService";
 
+const playfair = { fontFamily: "'Playfair Display', serif" };
+const inter    = { fontFamily: "'Inter', sans-serif" };
+
 export default function Navbar() {
   const user = useAuth();
   const [open, setOpen] = useState(false);
@@ -12,85 +15,98 @@ export default function Navbar() {
     if (res.success) window.location.href = "/login";
   };
 
-  const glass = "bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg";
   const linkStyle = ({ isActive }) =>
-    `text-sm font-medium transition ${
-      isActive ? "text-blue-300 font-semibold" : "text-gray-200 hover:text-white"
+    `text-xs tracking-widest uppercase transition-colors ${
+      isActive ? "text-yellow-500" : "text-neutral-400 hover:text-white"
+    }`;
+
+  const mobileLinkStyle = ({ isActive }) =>
+    `text-xs tracking-widest uppercase transition-colors block py-2 border-b border-neutral-900 ${
+      isActive ? "text-yellow-500" : "text-neutral-400 hover:text-white"
     }`;
 
   return (
-    <nav className="fixed top-4 right-6 z-50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-black border-b border-neutral-900">
+      <div className="max-w-7xl mx-auto px-6 h-16 flex items-center justify-between">
 
-      {/* DESKTOP NAV */}
-      <div className={`hidden md:flex items-center gap-4 px-5 py-2 rounded-full ${glass}`}>
-        <NavLink to="/" className={linkStyle}>Home</NavLink>
+        {/* LOGO */}
+        <NavLink
+          to="/"
+          className="text-white text-xl tracking-[0.25em] uppercase"
+          style={{ ...playfair, fontWeight: 700 }}
+        >
+          Lockheart
+        </NavLink>
 
-        {user === undefined && <span className="text-sm text-gray-300">Loading...</span>}
+        {/* DESKTOP LINKS */}
+        <div className="hidden md:flex items-center gap-8" style={inter}>
+          {user === undefined && (
+            <span className="text-xs text-neutral-700 tracking-widest">···</span>
+          )}
+          {user === null && (
+            <>
+              <NavLink to="/login"  className={linkStyle}>Sign In</NavLink>
+              <NavLink to="/signup"
+                className="text-xs tracking-widest uppercase px-4 py-2 bg-yellow-600 hover:bg-yellow-500 text-black transition-colors"
+                style={{ fontFamily: "'Inter', sans-serif", fontWeight: 600 }}
+              >
+                Register
+              </NavLink>
+            </>
+          )}
+          {user && (
+            <>
+              {user.role === "admin" && (
+                <NavLink to="/admin" className={linkStyle}>Admin</NavLink>
+              )}
+              <NavLink to="/profile" className={linkStyle}>Account</NavLink>
+              <button
+                onClick={handleLogout}
+                className="text-xs tracking-widest uppercase text-neutral-600 hover:text-red-400 transition-colors"
+                style={inter}
+              >
+                Sign Out
+              </button>
+            </>
+          )}
+        </div>
 
-        {user === null && (
-          <>
-            <NavLink to="/login"  className={linkStyle}>Login</NavLink>
-            <NavLink to="/signup" className={linkStyle}>Sign Up</NavLink>
-          </>
-        )}
-
-        {user && (
-          <>
-            {user.role === "user"  && <NavLink to="/profile"  className={linkStyle}>Profile</NavLink>}
-            {user.role === "admin" && <NavLink to="/admin" className={linkStyle}>Admin</NavLink>}
-
-            {user.role === "admin" && <NavLink to="/profile" className={linkStyle}>Profile</NavLink>}
-
-            <button
-              onClick={handleLogout}
-              className="text-sm font-medium text-red-300 hover:text-red-400 transition"
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* MOBILE NAV */}
-      <div className="md:hidden">
-        <button onClick={() => setOpen(!open)} className={`p-2 rounded-full ${glass}`}>
-          <div className="space-y-1">
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-          </div>
+        {/* MOBILE HAMBURGER */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden flex flex-col gap-1.5 p-1"
+        >
+          <span className={`block w-5 h-px bg-neutral-400 transition-all ${open ? "rotate-45 translate-y-2" : ""}`} />
+          <span className={`block w-5 h-px bg-neutral-400 transition-all ${open ? "opacity-0" : ""}`} />
+          <span className={`block w-5 h-px bg-neutral-400 transition-all ${open ? "-rotate-45 -translate-y-2" : ""}`} />
         </button>
-
-        {open && (
-          <div className={`absolute right-0 mt-3 w-48 p-3 flex flex-col space-y-2 rounded-xl ${glass}`}>
-            <NavLink to="/" onClick={() => setOpen(false)} className={linkStyle}>Home</NavLink>
-
-            {user === null && (
-              <>
-                <NavLink to="/login"  onClick={() => setOpen(false)} className={linkStyle}>Login</NavLink>
-                <NavLink to="/signup" onClick={() => setOpen(false)} className={linkStyle}>Sign Up</NavLink>
-              </>
-            )}
-
-            {user && (
-              <>
-                {user.role === "user"  && <NavLink to="/profile"  onClick={() => setOpen(false)} className={linkStyle}>Profile</NavLink>}
-                {user.role === "admin" && <NavLink to="/admin" onClick={() => setOpen(false)} className={linkStyle}>Admin</NavLink>}
-
-                {user.role === "admin" && <NavLink to="/profile" onClick={() => setOpen(false)} className={linkStyle}>Profile</NavLink>}
-
-                <button
-                  onClick={() => { setOpen(false); handleLogout(); }}
-                  className="text-sm text-red-300 hover:text-red-400 text-left"
-                >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
+      {/* MOBILE DROPDOWN */}
+      {open && (
+        <div className="md:hidden bg-black border-t border-neutral-900 px-6 py-4 flex flex-col" style={inter}>
+          {user === null && (
+            <>
+              <NavLink to="/login"  onClick={() => setOpen(false)} className={mobileLinkStyle}>Sign In</NavLink>
+              <NavLink to="/signup" onClick={() => setOpen(false)} className={mobileLinkStyle}>Register</NavLink>
+            </>
+          )}
+          {user && (
+            <>
+              {user.role === "admin" && (
+                <NavLink to="/admin" onClick={() => setOpen(false)} className={mobileLinkStyle}>Admin</NavLink>
+              )}
+              <NavLink to="/profile" onClick={() => setOpen(false)} className={mobileLinkStyle}>Account</NavLink>
+              <button
+                onClick={() => { setOpen(false); handleLogout(); }}
+                className="text-xs tracking-widest uppercase text-neutral-600 hover:text-red-400 transition-colors text-left py-2"
+              >
+                Sign Out
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 }

@@ -7,13 +7,22 @@ import {
   deleteUser,
 } from "../services/authService";
 
+const playfair = { fontFamily: "'Playfair Display', serif" };
+const inter = { fontFamily: "'Inter', sans-serif" };
+
+const thClass =
+  "px-4 py-3 text-left text-xs tracking-widest uppercase text-neutral-600 border-b border-neutral-900 bg-black sticky top-0 z-10";
+const tdClass =
+  "px-4 py-3 text-sm text-neutral-300 border-b border-neutral-900";
+const trClass = "hover:bg-neutral-950 transition-colors";
+
 export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [logs, setLogs] = useState([]);
   const [sessions, setSessions] = useState([]);
   const [tab, setTab] = useState("users");
   const [pendingRoles, setPendingRoles] = useState({});
-  const [open, setOpen] = useState();
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     getUsers().then((res) => res.success && setUsers(res.data));
@@ -21,9 +30,8 @@ export default function AdminDashboard() {
     getSessionLogs().then((res) => res.success && setSessions(res.data));
   }, []);
 
-  const handleRoleChange = (id, role) => {
+  const handleRoleChange = (id, role) =>
     setPendingRoles((prev) => ({ ...prev, [id]: role }));
-  };
 
   const handleSaveRole = async (u) => {
     const newRole = pendingRoles[u.u_id] ?? u.u_role;
@@ -45,217 +53,261 @@ export default function AdminDashboard() {
   const handleDelete = async (u) => {
     if (!confirm(`Delete ${u.u_email}? This cannot be undone.`)) return;
     const res = await deleteUser(u.u_id);
-    if (res.success) {
-      setUsers((prev) => prev.filter((x) => x.u_id !== u.u_id));
-    } else {
-      alert(res.message);
-    }
+    if (res.success) setUsers((prev) => prev.filter((x) => x.u_id !== u.u_id));
+    else alert(res.message);
   };
 
-  const glass =
-    "bg-white/10 backdrop-blur-lg border border-white/20 text-white shadow-lg";
+  const tabs = [
+    { value: "users", label: "Users" },
+    { value: "logs", label: "Login Logs" },
+    { value: "sessions", label: "Sessions" },
+  ];
+
   const tabStyle = (active) =>
-    `px-4 py-2 rounded-full text-sm font-medium transition ${
+    `px-5 py-2.5 text-xs tracking-widest uppercase transition-colors border-b-2 ${
       active
-        ? "bg-blue-600 text-white"
-        : "bg-white/10 text-gray-200 hover:bg-white/20"
+        ? "text-white border-yellow-600"
+        : "text-neutral-600 border-transparent hover:text-neutral-400"
     }`;
-  const tableHeader =
-    "sticky top-0 z-10 bg-black/60 backdrop-blur-lg border-b border-white/10";
 
   return (
-    <div
-      className="min-h-screen bg-cover bg-center flex flex-col p-6"
-      style={{ backgroundImage: "url('/background.jpg')" }}
-    >
-      <div className="absolute inset-0 bg-black/60"></div>
-      <div className="relative max-w-6xl mx-auto w-full flex flex-col h-[90vh]">
-        <h1 className="text-3xl font-bold text-white mb-6">Admin Dashboard</h1>
+    <div className="min-h-screen bg-black pt-16" style={inter}>
+      <div className="max-w-7xl mx-auto px-6 py-10">
+        {/* Header */}
+        <div className="mb-8">
+          <p
+            className="text-yellow-600/70 text-xs tracking-[0.5em] uppercase mb-2"
+            style={inter}
+          >
+            Lockheart
+          </p>
+          <h1
+            className="text-white text-3xl md:text-4xl"
+            style={{ ...playfair, fontWeight: 700 }}
+          >
+            Admin Panel.
+          </h1>
+        </div>
 
-        <div className="hidden md:flex gap-3 mb-4">
-          <button
-            onClick={() => setTab("users")}
-            className={tabStyle(tab === "users")}
-          >
-            Users
-          </button>
-          <button
-            onClick={() => setTab("logs")}
-            className={tabStyle(tab === "logs")}
-          >
-            Login Logs
-          </button>
-          <button
-            onClick={() => setTab("sessions")}
-            className={tabStyle(tab === "sessions")}
-          >
-            Sessions
-          </button>
+        {/* DESKTOP TABS */}
+        <div className="hidden md:flex border-b border-neutral-900 mb-6">
+          {tabs.map((t) => (
+            <button
+              key={t.value}
+              onClick={() => setTab(t.value)}
+              className={tabStyle(tab === t.value)}
+              style={inter}
+            >
+              {t.label}
+            </button>
+          ))}
         </div>
 
         {/* MOBILE DROPDOWN */}
-        <div className="relative flex md:hidden mb-4">
+        <div className="relative md:hidden mb-6">
           <button
             onClick={() => setOpen(!open)}
-            className="w-full px-4 py-2 rounded-full text-sm font-medium bg-white/10 backdrop-blur border border-white/20 text-white flex justify-between items-center"
+            className="w-full px-4 py-3 bg-neutral-950 border border-neutral-800 text-white text-xs tracking-widest uppercase flex justify-between items-center"
+            style={inter}
           >
-            <span>
-              {
-                { users: "Users", logs: "Login Logs", sessions: "Sessions" }[
-                  tab
-                ]
-              }
-            </span>
+            <span>{tabs.find((t) => t.value === tab)?.label}</span>
             <span
-              className={`transition-transform ${open ? "rotate-180" : ""}`}
+              className={`transition-transform duration-200 text-neutral-600 ${open ? "rotate-180" : ""}`}
             >
               ▼
             </span>
           </button>
-
           {open && (
-            <div className="absolute top-full mt-1 w-full rounded-xl bg-black/60 backdrop-blur-lg border border-white/20 overflow-hidden z-20">
-              {[
-                { value: "users", label: "Users" },
-                { value: "logs", label: "Login Logs" },
-                { value: "sessions", label: "Sessions" },
-              ].map((item) => (
+            <div className="absolute top-full w-full bg-neutral-950 border border-neutral-800 border-t-0 z-20">
+              {tabs.map((t) => (
                 <button
-                  key={item.value}
+                  key={t.value}
                   onClick={() => {
-                    setTab(item.value);
+                    setTab(t.value);
                     setOpen(false);
                   }}
-                  className={`w-full px-4 py-2 text-sm text-left transition ${
-                    tab === item.value
-                      ? "bg-blue-600 text-white"
-                      : "text-gray-200 hover:bg-white/20"
+                  className={`w-full px-4 py-3 text-xs tracking-widest uppercase text-left transition-colors ${
+                    tab === t.value
+                      ? "text-yellow-600 bg-neutral-900"
+                      : "text-neutral-500 hover:text-white hover:bg-neutral-900"
                   }`}
+                  style={inter}
                 >
-                  {item.label}
+                  {t.label}
                 </button>
               ))}
             </div>
           )}
         </div>
 
-        <div className={`flex-1 overflow-y-auto rounded-2xl ${glass}`}>
-          {/* USERS TABLE */}
-          {tab === "users" && (
-            <table className="w-full text-sm">
-              <thead className={tableHeader}>
-                <tr>
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Role</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.map((u) => {
-                  const currentRole = pendingRoles[u.u_id] ?? u.u_role;
-                  const dirty =
-                    pendingRoles[u.u_id] && pendingRoles[u.u_id] !== u.u_role;
-                  return (
-                    <tr
-                      key={u.u_id}
-                      className="border-t border-white/10 hover:bg-white/5"
-                    >
-                      <td className="p-3">{u.u_id}</td>
-                      <td className="p-3">{u.u_email}</td>
-                      <td className="p-3">
-                        <select
-                          value={currentRole}
-                          onChange={(e) =>
-                            handleRoleChange(u.u_id, e.target.value)
-                          }
-                          className="bg-white/10 text-white px-2 py-1 rounded border border-white/20"
-                        >
-                          <option value="user" className="text-black">
-                            user
-                          </option>
-                          <option value="admin" className="text-black">
-                            admin
-                          </option>
-                        </select>
-                      </td>
-                      <td className="p-3 flex gap-2">
-                        <button
-                          onClick={() => handleSaveRole(u)}
-                          disabled={!dirty}
-                          className={`px-3 py-1 text-sm rounded transition ${
-                            dirty
-                              ? "bg-blue-500/80 hover:bg-blue-500 cursor-pointer"
-                              : "bg-white/10 opacity-40 cursor-not-allowed"
+        {/* TABLE */}
+        <div className="border border-neutral-900 overflow-hidden">
+          <div className="overflow-x-auto overflow-y-auto max-h-[65vh]">
+            {/* USERS */}
+            {tab === "users" && (
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={thClass} style={inter}>
+                      ID
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Email
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Role
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((u) => {
+                    const currentRole = pendingRoles[u.u_id] ?? u.u_role;
+                    const dirty =
+                      pendingRoles[u.u_id] && pendingRoles[u.u_id] !== u.u_role;
+                    return (
+                      <tr key={u.u_id} className={trClass}>
+                        <td className={tdClass}>{u.u_id}</td>
+                        <td className={tdClass}>{u.u_email}</td>
+                        <td className={tdClass}>
+                          <select
+                            value={currentRole}
+                            onChange={(e) =>
+                              handleRoleChange(u.u_id, e.target.value)
+                            }
+                            className="bg-neutral-900 text-neutral-300 px-2 py-1.5 border border-neutral-800 text-xs focus:outline-none focus:border-yellow-700"
+                            style={inter}
+                          >
+                            <option value="user">user</option>
+                            <option value="admin">admin</option>
+                          </select>
+                        </td>
+                        <td className={tdClass}>
+                          <div className="flex gap-2">
+                            <button
+                              onClick={() => handleSaveRole(u)}
+                              disabled={!dirty}
+                              className={`px-3 py-1.5 text-xs tracking-widest uppercase transition-colors ${
+                                dirty
+                                  ? "bg-yellow-600 hover:bg-yellow-500 text-black cursor-pointer"
+                                  : "bg-neutral-900 text-neutral-700 cursor-not-allowed"
+                              }`}
+                              style={inter}
+                            >
+                              Save
+                            </button>
+                            <button
+                              onClick={() => handleDelete(u)}
+                              className="px-3 py-1.5 text-xs tracking-widest uppercase border border-neutral-800 text-neutral-600 hover:border-red-900 hover:text-red-400 transition-colors"
+                              style={inter}
+                            >
+                              Delete
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            )}
+
+            {/* LOGIN LOGS */}
+            {tab === "logs" && (
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={thClass} style={inter}>
+                      Email
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Status
+                    </th>
+                    <th className={thClass} style={inter}>
+                      IP
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Time
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {logs.map((l) => (
+                    <tr key={l.l_id} className={trClass}>
+                      <td className={tdClass}>{l.l_email_attempted}</td>
+                      <td className={tdClass}>
+                        <span
+                          className={`text-xs tracking-widest uppercase px-2 py-0.5 ${
+                            l.l_success
+                              ? "text-yellow-600/80 bg-yellow-950/40 border border-yellow-900/40"
+                              : "text-red-400/70 bg-red-950/40 border border-red-900/40"
                           }`}
+                          style={inter}
                         >
-                          Save
-                        </button>
-                        <button
-                          onClick={() => handleDelete(u)}
-                          className="px-3 py-1 text-sm rounded bg-red-500/60 hover:bg-red-500/80 transition"
+                          {l.l_success ? "Granted" : "Denied"}
+                        </span>
+                      </td>
+                      <td className={tdClass}>{l.l_ip_address}</td>
+                      <td className={tdClass}>{l.l_created_at}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+
+            {/* SESSIONS */}
+            {tab === "sessions" && (
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <th className={thClass} style={inter}>
+                      Email
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Session ID
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Login
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Logout
+                    </th>
+                    <th className={thClass} style={inter}>
+                      Status
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {sessions.map((s) => (
+                    <tr key={s.s_session_id} className={trClass}>
+                      <td className={tdClass}>{s.u_email}</td>
+                      <td
+                        className={`${tdClass} font-mono text-xs text-neutral-700`}
+                      >
+                        {s.s_session_id}
+                      </td>
+                      <td className={tdClass}>{s.s_login_time}</td>
+                      <td className={tdClass}>{s.s_logout_time ?? "—"}</td>
+                      <td className={tdClass}>
+                        <span
+                          className={`text-xs tracking-widest uppercase px-2 py-0.5 ${
+                            s.s_logout_time
+                              ? "text-neutral-600 bg-neutral-900 border border-neutral-800"
+                              : "text-yellow-600/80 bg-yellow-950/40 border border-yellow-900/40"
+                          }`}
+                          style={inter}
                         >
-                          Delete
-                        </button>
+                          {s.s_logout_time ? "Offline" : "Active"}
+                        </span>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          )}
-
-          {/* LOGIN LOGS */}
-          {tab === "logs" && (
-            <table className="w-full text-sm">
-              <thead className={tableHeader}>
-                <tr>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Success</th>
-                  <th className="p-3 text-left">IP</th>
-                  <th className="p-3 text-left">Time</th>
-                </tr>
-              </thead>
-              <tbody>
-                {logs.map((l) => (
-                  <tr key={l.l_id} className="border-t border-white/10">
-                    <td className="p-3">{l.l_email_attempted}</td>
-                    <td className="p-3">{l.l_success ? "Yes" : "No"}</td>
-                    <td className="p-3">{l.l_ip_address}</td>
-                    <td className="p-3">{l.l_created_at}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-
-          {/* SESSIONS */}
-          {tab === "sessions" && (
-            <table className="w-full text-sm">
-              <thead className={tableHeader}>
-                <tr>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Session ID</th>
-                  <th className="p-3 text-left">Login Time</th>
-                  <th className="p-3 text-left">Logout Time</th>
-                  <th className="p-3 text-left">Status</th>
-                </tr>
-              </thead>
-              <tbody>
-                {sessions.map((s) => (
-                  <tr key={s.s_session_id} className="border-t border-white/10">
-                    <td className="p-3">{s.u_email}</td>
-                    <td className="p-3">{s.s_session_id}</td>
-                    <td className="p-3">{s.s_login_time}</td>
-                    <td className="p-3">{s.s_logout_time ?? "Active"}</td>
-                    <td className="p-3">
-                      {s.s_logout_time ? "Logged out" : "Active"}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>
