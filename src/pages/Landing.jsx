@@ -7,7 +7,7 @@ export default function Landing() {
       style={{ backgroundImage: "url('/background.jpg')" }}
     >
       {/* Cinematic gradient overlay */}
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95" />
+      <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95" />
 
       {/* Horizontal top rule */}
       <div className="relative z-10 mt-14 mx-8 md:mx-16 border-t border-amber-900/40" />
@@ -37,7 +37,7 @@ export default function Landing() {
 
         {/* Tagline */}
         <p
-          className="text-amber-100/50 text-lg md:text-xl italic max-w-md leading-relaxed mb-10"
+          className="text-amber-100/70 text-lg md:text-xl italic max-w-md leading-relaxed mb-10"
           style={{ fontFamily: "'EB Garamond', serif" }}
         >
           We do not conquer territories. We haunt them.
@@ -65,7 +65,7 @@ export default function Landing() {
       {/* BOTTOM STRIP */}
       <div className="relative z-10 border-t border-amber-900/30 px-8 md:px-16 py-4 flex flex-col md:flex-row justify-between items-center gap-2">
         <p
-          className="text-zinc-600 text-xs tracking-widest uppercase"
+          className="text-zinc-400 text-xs tracking-widest uppercase"
           style={{ fontFamily: "'Cinzel', serif" }}
         >
           Information Assurance & Security

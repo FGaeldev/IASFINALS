@@ -37,7 +37,7 @@ export default function Navbar() {
         {/* DESKTOP LINKS */}
         <div className="hidden md:flex items-center gap-8">
           {user === undefined && (
-            <span className="text-xs text-zinc-600 tracking-widest uppercase">
+            <span className="text-xs text-zinc-400 tracking-widest uppercase">
               ···
             </span>
           )}
