@@ -1,62 +1,72 @@
 <?php
+
 session_start();
 
+header("Content-Type: application/json");
 header("Access-Control-Allow-Origin: http://localhost:5173");
 header("Access-Control-Allow-Credentials: true");
-header("Access-Control-Allow-Headers: Content-Type, Authorization");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
-header("Content-Type: application/json");
+header("Access-Control-Allow-Headers: Content-Type");
 
-if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
+if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     http_response_code(200);
     exit();
 }
 
-require_once "./routes/auth.php";
-require_once "./routes/admin.php";
+require_once __DIR__ . "/config/db.php";
+require_once __DIR__ . "/controllers/AuthController.php";
+require_once __DIR__ . "/controllers/UserController.php";
+require_once __DIR__ . "/controllers/AdminController.php";
 
-$action = $_GET['action'] ?? '';
+$auth = new AuthController($conn);
+$user = new UserController($conn);
+$admin = new AdminController($conn);
+
+$action = $_GET["action"] ?? "";
 
 switch ($action) {
     case "login":
-        login();
-        break;
-    case "verify2fa":
-        verify_security_question();
+        $auth->login();
         break;
     case "signup":
-        signup();
+        $auth->signup();
         break;
-    case "getSecurityQuestion":
-        get_security_question();
+    case "verify2fa":
+        $auth->verify2fa();
         break;
     case "me":
-        me();
+        $auth->me();
         break;
     case "logout":
-        logout();
+        $auth->logout();
         break;
-    case "users":
-        get_users();
-        break;
-    case "loginLogs":
-        get_login_logs();
-        break;
-    case "sessionLogs":
-        get_session_logs();
-        break;
-    case "updateRole":
-        update_role();
-        break;
-    case "deleteUser":
-        delete_user();
-        break;
-    default:
+
     case "profile":
-        get_profile();
+        $user->getProfile();
+        break;
+    case "getSecurityQuestion":
+        $user->getSecurityQuestion();
         break;
     case "update2fa":
-        update_2fa();
+        $user->update2fa();
         break;
+
+    case "users":
+        $admin->getUsers();
+        break;
+    case "loginLogs":
+        $admin->getLoginLogs();
+        break;
+    case "sessionLogs":
+        $admin->getSessionLogs();
+        break;
+    case "updateRole":
+        $admin->updateRole();
+        break;
+    case "deleteUser":
+        $admin->deleteUser();
+        break;
+
+    default:
         echo json_encode(["success" => false, "message" => "Invalid route"]);
 }
