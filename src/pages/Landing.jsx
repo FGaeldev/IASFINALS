@@ -17,7 +17,7 @@ export default function Landing() {
 
         {/* Org name */}
         <h1
-          className="text-amber-200 text-6xl md:text-8xl lg:text-9xl leading-none tracking-[0.15em] uppercase mb-2"
+          className="text-amber-200 text-5xl md:text-8xl lg:text-9xl leading-none tracking-[0.15em] uppercase mb-2"
           style={{ fontFamily: "'Cinzel Decorative', serif", fontWeight: 700 }}
         >
           Nomads
