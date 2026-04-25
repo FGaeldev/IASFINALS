@@ -31,7 +31,7 @@ export default function Navbar() {
           className="text-amber-400 text-lg tracking-[0.3em] uppercase"
           style={{ fontFamily: "'Cinzel', serif", fontWeight: 700 }}
         >
-          NOMAD|UMS
+          NOMADS|UMS
         </NavLink>
 
         {/* DESKTOP LINKS */}
