@@ -12,85 +12,136 @@ export default function Navbar() {
     if (res.success) window.location.href = "/login";
   };
 
-  const glass = "bg-white/10 backdrop-blur-lg border border-white/20 shadow-lg";
   const linkStyle = ({ isActive }) =>
-    `text-sm font-medium transition ${
-      isActive ? "text-blue-300 font-semibold" : "text-gray-200 hover:text-white"
+    `text-xs tracking-widest uppercase transition font-normal ${
+      isActive ? "text-amber-400" : "text-amber-100/60 hover:text-amber-200"
+    }`;
+
+  const mobileLink = ({ isActive }) =>
+    `text-xs tracking-widest uppercase transition block py-1 border-b border-zinc-800 ${
+      isActive ? "text-amber-400" : "text-amber-100/60 hover:text-amber-200"
     }`;
 
   return (
-    <nav className="fixed top-4 right-6 z-50">
+    <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800">
+      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+        {/* LOGO */}
+        <NavLink
+          to="/"
+          className="text-amber-400 text-lg tracking-[0.3em] uppercase"
+          style={{ fontFamily: "'Cinzel', serif", fontWeight: 700 }}
+        >
+          NOMAD|UMS
+        </NavLink>
 
-      {/* DESKTOP NAV */}
-      <div className={`hidden md:flex items-center gap-4 px-5 py-2 rounded-full ${glass}`}>
-        <NavLink to="/" className={linkStyle}>Home</NavLink>
+        {/* DESKTOP LINKS */}
+        <div className="hidden md:flex items-center gap-8">
+          {user === undefined && (
+            <span className="text-xs text-zinc-600 tracking-widest uppercase">
+              ···
+            </span>
+          )}
 
-        {user === undefined && <span className="text-sm text-gray-300">Loading...</span>}
+          {user === null && (
+            <>
+              <NavLink to="/login" className={linkStyle}>
+                Login
+              </NavLink>
+              <NavLink to="/signup" className={linkStyle}>
+                Sign Up
+              </NavLink>
+            </>
+          )}
 
-        {user === null && (
-          <>
-            <NavLink to="/login"  className={linkStyle}>Login</NavLink>
-            <NavLink to="/signup" className={linkStyle}>Sign Up</NavLink>
-          </>
-        )}
+          {user && (
+            <>
+              {user.role === "admin" && (
+                <NavLink to="/admin" className={linkStyle}>
+                  Admin
+                </NavLink>
+              )}
+              <NavLink to="/profile" className={linkStyle}>
+                Profile
+              </NavLink>
+              <button
+                onClick={handleLogout}
+                className="text-xs tracking-widest uppercase text-red-400/60 hover:text-red-400 transition"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
 
-        {user && (
-          <>
-            {user.role === "user"  && <NavLink to="/profile"  className={linkStyle}>Profile</NavLink>}
-            {user.role === "admin" && <NavLink to="/admin" className={linkStyle}>Admin</NavLink>}
-
-            {user.role === "admin" && <NavLink to="/profile" className={linkStyle}>Profile</NavLink>}
-
-            <button
-              onClick={handleLogout}
-              className="text-sm font-medium text-red-300 hover:text-red-400 transition"
-            >
-              Logout
-            </button>
-          </>
-        )}
-      </div>
-
-      {/* MOBILE NAV */}
-      <div className="md:hidden">
-        <button onClick={() => setOpen(!open)} className={`p-2 rounded-full ${glass}`}>
-          <div className="space-y-1">
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-            <span className="block w-5 h-0.5 bg-gray-200"></span>
-          </div>
+        {/* MOBILE HAMBURGER */}
+        <button
+          onClick={() => setOpen(!open)}
+          className="md:hidden flex flex-col gap-1.5 p-1"
+        >
+          <span
+            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "rotate-45 translate-y-2" : ""}`}
+          />
+          <span
+            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "opacity-0" : ""}`}
+          />
+          <span
+            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "-rotate-45 -translate-y-2" : ""}`}
+          />
         </button>
-
-        {open && (
-          <div className={`absolute right-0 mt-3 w-48 p-3 flex flex-col space-y-2 rounded-xl ${glass}`}>
-            <NavLink to="/" onClick={() => setOpen(false)} className={linkStyle}>Home</NavLink>
-
-            {user === null && (
-              <>
-                <NavLink to="/login"  onClick={() => setOpen(false)} className={linkStyle}>Login</NavLink>
-                <NavLink to="/signup" onClick={() => setOpen(false)} className={linkStyle}>Sign Up</NavLink>
-              </>
-            )}
-
-            {user && (
-              <>
-                {user.role === "user"  && <NavLink to="/profile"  onClick={() => setOpen(false)} className={linkStyle}>Profile</NavLink>}
-                {user.role === "admin" && <NavLink to="/admin" onClick={() => setOpen(false)} className={linkStyle}>Admin</NavLink>}
-
-                {user.role === "admin" && <NavLink to="/profile" onClick={() => setOpen(false)} className={linkStyle}>Profile</NavLink>}
-
-                <button
-                  onClick={() => { setOpen(false); handleLogout(); }}
-                  className="text-sm text-red-300 hover:text-red-400 text-left"
-                >
-                  Logout
-                </button>
-              </>
-            )}
-          </div>
-        )}
       </div>
 
+      {/* MOBILE DROPDOWN */}
+      {open && (
+        <div className="md:hidden bg-zinc-950 border-t border-zinc-800 px-6 py-4 flex flex-col gap-3">
+          {user === null && (
+            <>
+              <NavLink
+                to="/login"
+                onClick={() => setOpen(false)}
+                className={mobileLink}
+              >
+                Login
+              </NavLink>
+              <NavLink
+                to="/signup"
+                onClick={() => setOpen(false)}
+                className={mobileLink}
+              >
+                Sign Up
+              </NavLink>
+            </>
+          )}
+          {user && (
+            <>
+              {user.role === "admin" && (
+                <NavLink
+                  to="/admin"
+                  onClick={() => setOpen(false)}
+                  className={mobileLink}
+                >
+                  Admin
+                </NavLink>
+              )}
+              <NavLink
+                to="/profile"
+                onClick={() => setOpen(false)}
+                className={mobileLink}
+              >
+                Profile
+              </NavLink>
+              <button
+                onClick={() => {
+                  setOpen(false);
+                  handleLogout();
+                }}
+                className="text-xs tracking-widest uppercase text-red-400/60 hover:text-red-400 transition text-left py-1"
+              >
+                Logout
+              </button>
+            </>
+          )}
+        </div>
+      )}
     </nav>
   );
 }
