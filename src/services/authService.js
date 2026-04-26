@@ -230,3 +230,13 @@ export async function deleteUser(userId) {
   });
   return res.json();
 }
+
+export async function changePassword(data) {
+  const res = await fetch(`${API_URL}?action=changePassword`, {
+    method: "POST",
+    credentials: "include",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(data),
+  });
+  return res.json();
+}

@@ -95,4 +95,11 @@ class UserModel
         $stmt->bind_param("i", $id);
         $stmt->execute();
     }
+
+    public function updatePassword($id, $hashedPassword)
+    {
+        $stmt = $this->conn->prepare("UPDATE users SET u_password = ? WHERE u_id = ?");
+        $stmt->bind_param("si", $hashedPassword, $id);
+        $stmt->execute();
+    }
 }
