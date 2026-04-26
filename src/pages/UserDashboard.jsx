@@ -132,7 +132,7 @@ export default function UserDashboard() {
       className="relative min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center px-4 py-20"
       style={{ backgroundImage: "url('/background.jpg')" }}
     >
-      <div className="absolute inset-0 bg-gradient-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95" />
+      <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95" />
 
       <div className="relative w-full max-w-sm">
         {/* Top ornament */}
