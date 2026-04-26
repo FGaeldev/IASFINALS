@@ -1,123 +1,160 @@
-# Nomads — User Management System
+# Lockheart — User Management System
 
-> _We do not conquer territories. We haunt them._
+> _Crafted for those who wear their confidence._
 
-**Author:** Isaac Psalm Inamac
+**Author:** Vince Timothy Esmeralda
 **Course:** Information Assurance & Security 1
 
 ---
 
 ## 1. How the System Works
 
-Nomads is a full-stack user management system built with **React** on the frontend and **PHP + MySQL** on the backend. All communication flows through a single PHP entry point (`server/index.php`) which routes requests to the appropriate controller based on an `action` query parameter.
+Lockheart is a full-stack user management system built for the **Lockheart** luxury e-commerce brand. The frontend is built with **React + Vite** and communicates with a **PHP + MySQL** backend through a single entry point (`server/index.php`), which routes requests to the appropriate handler based on an `action` query parameter.
 
 ### Login Flow (Two-Factor Authentication)
-
-The system uses a **two-step login process**:
 
 ```
 [1] User submits email + password
         ↓
-[2] Backend verifies credentials
+[2] Backend verifies credentials against database
         ↓
 [3] $_SESSION["pending_user"] set — NOT fully logged in yet
         ↓
-[4] User answers their security question (2FA)
+[4] Frontend redirects to security question page
         ↓
-[5] Backend verifies answer
+[5] User answers their personal security question
         ↓
-[6] Session promoted — user_id + role written to session
+[6] Backend verifies answer
         ↓
-[7] Redirected to dashboard based on role
+[7] Session promoted — user_id + role written to session
+        ↓
+[8] Redirected to dashboard based on role
 ```
 
 ### Architecture
 
-The backend follows an **MVC-lite pattern**:
-
 ```
-index.php         → Router — receives action, dispatches to controller
-controllers/      → Business logic (AuthController, UserController, AdminController)
-models/           → Database queries only (UserModel, LogModel)
-middleware/       → Session and role guards (require_auth, require_role)
-utils/            → Password hashing, response formatting, session logging
+server/
+├── index.php          → Router — maps action → handler function
+├── routes/
+│   ├── auth.php       → login, signup, logout, me, 2FA, profile
+│   └── admin.php      → users, logs, sessions, role/delete
+├── middleware/
+│   └── auth.php       → require_auth(), require_role(), require_pending_auth()
+├── utils/
+│   ├── password.php   → hash_password(), verify_password(), password_errors()
+│   ├── response.php   → json_response()
+│   ├── logger.php     → log_attempt()
+│   └── session_logger.php → logSessionStart(), logSessionEnd()
+└── config/
+    └── db.php         → MySQL connection
 ```
-
-The frontend uses **React Router** with protected routes that verify the user's session and role before rendering any page.
 
 ### Tech Stack
 
-| Layer        | Technology                                   |
-| ------------ | -------------------------------------------- |
-| Frontend     | React 19, Vite, Tailwind CSS, React Router 7 |
-| Backend      | PHP 8, MySQL (MySQLi)                        |
-| Architecture | MVC-lite (Controllers + Models)              |
-| Server       | Apache (XAMPP local / Hostinger production)  |
+| Layer    | Technology                                   |
+| -------- | -------------------------------------------- |
+| Frontend | React 19, Vite, Tailwind CSS, React Router 7 |
+| Backend  | PHP 8, MySQL (MySQLi)                        |
+| Fonts    | Playfair Display, Inter                      |
+| Server   | Apache (XAMPP local / Hostinger production)  |
+
+### Pages
+
+| Page                  | Route                | Access               |
+| --------------------- | -------------------- | -------------------- |
+| Landing               | `/`                  | Public               |
+| Sign In               | `/login`             | Public               |
+| Register              | `/signup`            | Public               |
+| Security Verification | `/security-question` | Pending session only |
+| Account               | `/user`              | `user` role          |
+| Admin Panel           | `/admin`             | `admin` role         |
+| Profile               | `/profile`           | Both roles           |
+
+### Database Naming Convention
+
+| Prefix | Table        |
+| ------ | ------------ |
+| `u_`   | users        |
+| `l_`   | login_logs   |
+| `s_`   | session_logs |
 
 ---
 
 ## 2. Security Features Implemented
 
-### Password Security
+### Password Hashing — bcrypt
 
-- All passwords hashed using **bcrypt** (`PASSWORD_BCRYPT`) via PHP's `password_hash()`
-- bcrypt is a slow, salted hashing algorithm — resistant to brute-force and rainbow table attacks
-- **Strong password policy enforced on both frontend and backend:**
-  - Minimum 8 characters
-  - At least one uppercase letter
-  - At least one lowercase letter
-  - At least one number
-  - At least one special character
-- Frontend shows a live strength meter; backend rejects weak passwords even if frontend is bypassed
+- All passwords hashed using **bcrypt** (`PASSWORD_BCRYPT`) via PHP's native `password_hash()`
+- bcrypt is slow and salted by design — resistant to brute-force and rainbow table attacks
+- Security question answers also hashed with bcrypt — never stored in plaintext
+
+### Strong Password Policy
+
+Enforced on **both frontend and backend** — backend rejects weak passwords even if frontend is bypassed:
+
+- Minimum 8 characters
+- At least one uppercase letter
+- At least one lowercase letter
+- At least one number
+- At least one special character
+
+Frontend shows a live **password strength meter** (Weak → Poor → Fair → Good → Strong).
 
 ### Two-Factor Authentication (2FA)
 
-- Login is a **two-step process** — passing Step 1 (password) does not grant access
-- Step 2 requires answering a personal security question set during signup
-- Security answers are also hashed with bcrypt before storage
-- A `pending_user` session separates the two steps — prevents partial auth from granting access
+- Login requires **two separate steps** — passing Step 1 does not grant access
+- Step 2 requires answering a personal security question set during registration
+- A `pending_user` session variable separates the steps — partial auth cannot access protected resources
+- Security question and hint fetched live from the server — not stored client-side
 
 ### Session Security
 
-- `session_regenerate_id(true)` called on every successful login — prevents **session fixation attacks**
+- `session_regenerate_id(true)` on every successful login — prevents **session fixation**
 - Session cookies configured with:
-  - `httponly` — JavaScript cannot access the cookie
+  - `httponly` — JavaScript cannot read the cookie
   - `secure` — Cookie only sent over HTTPS
-  - `samesite=Strict` — Prevents cross-site request forgery (CSRF)
-- **Concurrent session enforcement** — when a user logs in, all their previous active sessions are automatically closed. Only one active session per user at any time.
+  - `samesite=Strict` — Prevents CSRF attacks
+- **Concurrent session enforcement** — new login automatically closes all prior active sessions. One active session per user maximum.
 
 ### Brute-Force Protection
 
-- Failed login attempts are tracked per user in the database
-- After **3 consecutive failed attempts**, the account is **locked for 60 seconds**
-- Failed attempts counter resets on successful login
+- Failed login attempts tracked per user in the database
+- After **3 consecutive failures** → account locked for **60 seconds**
+- Counter resets on successful login
+- Lockout checked before password verification — locked accounts rejected immediately
 
 ### Audit Logging
 
-- Every login attempt (success or failure) is recorded in `login_logs` with:
-  - Email attempted
-  - IP address
-  - Timestamp
-  - Success/failure status
-- Every session is recorded in `session_logs` with login time and logout time
+Every login attempt logged in `login_logs`:
 
-### Input & Data Security
+- Email attempted, IP address, timestamp, success/failure
 
-- All database queries use **prepared statements** with parameter binding — prevents SQL injection
-- Passwords and security answers are never returned in API responses
-- `.env` file stores database credentials — never committed to version control
+Every session logged in `session_logs`:
+
+- User, session ID, login time, logout time (null if still active)
+
+### SQL Injection Prevention
+
+- All database queries use **prepared statements** with parameter binding
+- User input is never interpolated directly into SQL strings
+
+### Credential Security
+
+- Database credentials stored in `server/config/db.php` — not committed with plaintext values in production
+- Passwords and security answers never returned in any API response
 
 ---
 
 ## 3. How Access Control is Enforced
 
-The system implements **Role-Based Access Control (RBAC)** with two roles: `user` and `admin`.
+The system uses **Role-Based Access Control (RBAC)** with two roles: `user` and `admin`.
 
-### Roles & Permissions
+### Permissions
 
 | Feature                | `user` | `admin` |
 | ---------------------- | ------ | ------- |
-| Profile / Account page | ✓      | ✓       |
+| Account / Profile page | ✓      | ✓       |
 | Edit security question | ✓      | ✓       |
 | View all users         | ✗      | ✓       |
 | Edit user roles        | ✗      | ✓       |
@@ -127,70 +164,77 @@ The system implements **Role-Based Access Control (RBAC)** with two roles: `user
 
 ### Frontend Enforcement
 
-Protected routes in React check the user's session via the `useAuth` hook before rendering:
+`ProtectedRoute` wraps every protected page — checks session via `useAuth` hook before rendering:
 
 ```
 User visits /admin
         ↓
 ProtectedRoute calls getMe() → checks session
         ↓
-If no session → redirect to /login
-If wrong role → redirect to /
-If correct role → render page
+No session       → redirect to /login
+Wrong role       → redirect to /
+Correct role     → render page
+```
+
+Supports single role and role arrays:
+
+```jsx
+<ProtectedRoute role="admin">          // admin only
+<ProtectedRoute role={["user","admin"]} // both roles
 ```
 
 ### Backend Enforcement
 
-Every protected endpoint calls middleware before executing any logic:
+Every protected endpoint calls middleware before any logic runs:
 
 ```php
-// Blocks unauthenticated access
 function require_auth() {
     if (!isset($_SESSION["user_id"])) {
         json_response(false, "Unauthorized");
+        exit;
     }
 }
 
-// Blocks wrong role access
 function require_role($role) {
     require_auth();
     if ($_SESSION["role"] !== $role) {
         json_response(false, "Forbidden");
+        exit;
     }
 }
 ```
 
-**Frontend protection is UI-only.** All sensitive operations are re-verified server-side. An attacker bypassing the frontend would still be blocked at the API level.
+**Frontend protection is UI-only.** All sensitive operations are independently verified server-side — bypassing React still hits the middleware wall.
 
-### Additional Admin Safeguards
+### Admin Safeguards
 
-- Admin cannot change their own role (prevents accidental self-demotion)
+- Admin cannot change their own role
 - Admin cannot delete their own account
-- Role changes are validated against a whitelist (`user`, `admin` only)
+- Role values validated against whitelist (`user`, `admin` only)
 
 ---
 
 ## 4. Challenges Encountered
 
-### Session Persistence Across Steps
+### Two-Step Session State
 
-The two-step login required careful session management. After Step 1, the user needed to be in a "pending" state — authenticated enough to proceed to Step 2, but not enough to access protected resources. This was solved by storing only `pending_user` in the session after Step 1, and only writing `user_id` and `role` after Step 2 succeeds.
+Designing a "pending" authentication state required care. After Step 1, the user needed to be held in limbo — past password check but blocked from protected resources until the security question was answered. Solved by storing only `pending_user` after Step 1, then writing `user_id` and `role` only after Step 2 succeeds.
 
 ### Concurrent Session Enforcement
 
-Ensuring only one active session per user required closing existing sessions before creating a new one. The challenge was timing — this had to happen after the security question was verified but before the new session was recorded, to avoid a race condition where both sessions briefly coexisted.
+Closing prior sessions before starting a new one required precise timing — after 2FA verification but before `logSessionStart()` — to avoid a window where both sessions coexisted. An `UPDATE session_logs SET s_logout_time = NOW() WHERE s_user_id = ? AND s_logout_time IS NULL` query runs immediately before session promotion.
 
 ### Cross-Origin Sessions (CORS + Cookies)
 
-Running the React frontend on `localhost:5173` (Vite) and the PHP backend on `localhost/path` (XAMPP) are treated as different origins by the browser. Getting session cookies to persist across these required setting `credentials: "include"` on every fetch request and correctly configuring `Access-Control-Allow-Credentials` and `Access-Control-Allow-Origin` headers on the backend.
-
-### Separation of Concerns Refactor
-
-The original codebase had all logic in route files (`auth.php`, `admin.php`). As the project grew, this became difficult to maintain. Refactoring to an MVC-lite structure (Controllers + Models) required carefully extracting database logic into Models without breaking any existing functionality.
+Vite (`localhost:5173`) and XAMPP (`localhost/path`) are different origins. Cookies wouldn't persist across them without `credentials: "include"` on every fetch, and `Access-Control-Allow-Credentials: true` + a non-wildcard `Access-Control-Allow-Origin` on the backend. A wildcard origin breaks credentialed requests entirely.
 
 ### SPA Routing on Deployment
 
-After deploying to Hostinger, refreshing any page other than `/` returned a 404 because the server tried to find a physical file at that path. React Router handles routing client-side, so the server needed an `.htaccess` rewrite rule to always serve `index.html` and let React handle the rest.
+Refreshing any page on Hostinger returned 404 because Apache looked for a physical file at the URL path. Since React Router handles routing client-side, an `.htaccess` rewrite rule was needed to always serve `index.html` and let React take over.
+
+### Null User on Login Attempt Log
+
+When a user enters an email that doesn't exist, `$user` is null — passing `$user["u_id"]` to `log_attempt()` caused a PHP warning. Fixed by passing `null` explicitly when the user is not found.
 
 ---
 
@@ -198,35 +242,35 @@ After deploying to Hostinger, refreshing any page other than `/` returned a 404 
 
 ### Defense in Depth
 
-Security is applied at **multiple layers** — not just one. Even if one layer is bypassed, others remain:
+Security is enforced at every layer — not just one:
 
-| Layer    | Protection                                                  |
-| -------- | ----------------------------------------------------------- |
-| Frontend | Password strength meter, input validation, protected routes |
-| Network  | HTTPS, SameSite cookies, CORS headers                       |
-| Backend  | Role middleware on every endpoint, prepared statements      |
-| Database | Bcrypt hashed passwords and answers, no plaintext secrets   |
-| Audit    | Every login and session logged with IP and timestamp        |
+| Layer    | Protection                                                   |
+| -------- | ------------------------------------------------------------ |
+| Frontend | Password strength meter, input validation, protected routes  |
+| Network  | HTTPS, HttpOnly + SameSite cookies, CORS headers             |
+| Backend  | Role middleware on every endpoint, prepared statements       |
+| Database | bcrypt-hashed passwords and answers, no plaintext secrets    |
+| Audit    | Every login attempt and session logged with IP and timestamp |
 
 ### Why bcrypt
 
-bcrypt is deliberately slow — it is designed to take computational effort to compute. This means even if the database is compromised and password hashes are stolen, an attacker cannot quickly reverse them through brute force. Each hash also includes a unique salt, so identical passwords produce different hashes — rainbow tables are ineffective.
+bcrypt is computationally expensive by design. Even if the database is stolen and hashes extracted, brute-forcing them is impractical. Each hash includes a unique random salt — identical passwords produce different hashes, making rainbow tables useless.
 
 ### Why Two Factors
 
-A password alone can be stolen through phishing, data breaches, or guessing. Requiring a second factor (security question) means an attacker needs both the password **and** knowledge of the answer. Neither factor alone is sufficient to gain access.
+A password alone can be stolen through phishing, credential stuffing, or breaches of other services. Requiring a security question means an attacker needs both the password and private personal knowledge. Neither alone is sufficient.
 
-### Why Sessions and Not Just JWTs
+### Why Server-Side Sessions
 
-PHP sessions store authentication state **server-side**. The browser only holds a session ID cookie — it cannot be decoded to extract user information. This means revoking a session (on logout or concurrent session enforcement) takes effect immediately with no token expiry window.
+Session state lives on the server — the browser only holds an opaque session ID. This means revoking a session (logout, lockout, concurrent session enforcement) is immediate with no expiry window to exploit.
 
 ### Why Prepared Statements
 
-Every database query uses parameterized prepared statements. User input is never directly interpolated into SQL strings, making SQL injection attacks structurally impossible regardless of what input is submitted.
+User input is passed as a bound parameter — never concatenated into SQL. The database engine treats it purely as data, making SQL injection structurally impossible regardless of input content.
 
 ### Principle of Least Privilege
 
-Users only have access to what their role requires. The `user` role cannot reach admin endpoints — not because the frontend hides the buttons, but because the backend actively rejects any request that lacks admin role in the session.
+Users only access what their role permits. The `user` role is blocked from admin endpoints not by hidden UI but by server-side middleware that actively rejects requests with the wrong session role.
 
 ---
 
@@ -235,12 +279,14 @@ Users only have access to what their role requires. The `user` role cannot reach
 ### Local
 
 ```bash
-# Frontend
 npm install
 npm run dev
+```
 
-# Backend — copy and fill credentials
-cp server/.env.example server/.env
+Configure `server/config/db.php` with your local MySQL credentials and update `src/services/authService.js`:
+
+```js
+const API_URL = "http://localhost/your-path/server/index.php";
 ```
 
 ### Production (Hostinger)
@@ -249,10 +295,9 @@ cp server/.env.example server/.env
 npm run build
 # Upload /dist to public_html/
 # Upload server/ alongside public_html/
-# Add .htaccess to public_html/ for SPA routing
 ```
 
-### `.htaccess` (SPA routing fix)
+Add to `public_html/.htaccess`:
 
 ```apache
 <IfModule mod_rewrite.c>
@@ -265,11 +310,4 @@ npm run build
 </IfModule>
 ```
 
-### Environment Variables
-
-```env
-DB_HOST=localhost
-DB_USER=
-DB_PASS=
-DB_NAME=
-```
+Set PHP to **8.x** in hPanel → PHP Configuration.
