@@ -1,1 +1,45 @@
 @import "tailwindcss";
+
+/*
+  GroundZero Design Tokens
+  ─────────────────────────────────────────────────────────────────────
+  Theme   : Homely / Tropical
+  Palette : Emerald primary, Olive mid, Warm cream accents
+  Surfaces: Deep forest darks (replaces zinc-950)
+*/
+:root {
+  /* Brand greens */
+  --gz-emerald:     #2d6a4f;   /* primary CTA / active */
+  --gz-emerald-lt:  #40916c;   /* hover state */
+  --gz-emerald-dim: #1b4332;   /* deep bg tint */
+  --gz-olive:       #606c38;   /* secondary accent */
+  --gz-olive-lt:    #8a9a5b;   /* muted labels */
+
+  /* Warm neutrals — replaces zinc */
+  --gz-bark:        #1a1a14;   /* darkest bg (≈ zinc-950) */
+  --gz-soil:        #2a2a1e;   /* card / nav bg */
+  --gz-driftwood:   #4a4a38;   /* borders */
+  --gz-sand:        #c9b99a;   /* body text */
+  --gz-cream:       #f0e6d3;   /* headings / bright text */
+
+  /* Semantic */
+  --gz-danger:      #c1440e;
+  --gz-border:      rgba(96, 108, 56, 0.35);   /* olive border @ 35% */
+  --gz-overlay:     rgba(26, 26, 20, 0.82);
+
+  /* Font families */
+  --font-display: 'Playfair Display', serif;
+  --font-ui:      'Josefin Sans', sans-serif;
+  --font-body:    'Lato', sans-serif;
+}
+
+/* Base reset */
+*, *::before, *::after { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background-color: var(--gz-bark);
+  color: var(--gz-sand);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}

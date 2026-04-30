@@ -1,54 +1,70 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { signup } from "../services/authService";
 
-function getPasswordStrength(pw) {
-  return [
-    { pass: pw.length >= 8, label: "8+ chars" },
-    { pass: /[A-Z]/.test(pw), label: "Uppercase" },
-    { pass: /[a-z]/.test(pw), label: "Lowercase" },
-    { pass: /[0-9]/.test(pw), label: "Number" },
-    { pass: /[\W_]/.test(pw), label: "Special char" },
-  ];
-}
-
-const strengthLabel = ["", "Feeble", "Weak", "Decent", "Strong", "Formidable"];
-const strengthColor = [
-  "",
-  "bg-red-700",
-  "bg-orange-600",
-  "bg-yellow-500",
-  "bg-lime-500",
-  "bg-amber-500",
-];
-
-const cinzel = { fontFamily: "'Cinzel', serif" };
-const garamond = { fontFamily: "'EB Garamond', serif" };
-
-const inputClass =
-  "w-full px-4 py-2.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-600 focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/50 text-amber-100 placeholder-zinc-500 transition-colors";
-const labelClass = "text-amber-500/90 text-xs tracking-widest uppercase";
-
+/*
+  Signup.jsx — GroundZero
+  ─────────────────────────────────────────────────────────────────────
+  Theme   : Homely / Tropical — Bento-card signup form
+  Layout  : Centered card, wider than login (two-col fields on md+)
+  Palette : --gz-* tokens from index.css
+  Fonts   : Playfair Display (heading) · Josefin Sans (labels/btn) · Lato (inputs)
+  Password: Live strength meter — 4 segments, labeled, blocks weak submit
+*/
 export default function Signup() {
   const [form, setForm] = useState({
+    firstName: "",
+    lastName: "",
     email: "",
     password: "",
-    security_question: "",
-    security_answer: "",
-    security_hint: "",
+    confirmPassword: "",
+    securityQuestion: "",
+    securityAnswer: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleChange = (e) =>
-    setForm({ ...form, [e.target.name]: e.target.value });
+  const set = (field) => (e) =>
+    setForm((prev) => ({ ...prev, [field]: e.target.value }));
+
+  /*
+    Password strength scoring
+    ─────────────────────────────────────────────────────────────────
+    0 — empty
+    1 — weak    : < 8 chars
+    2 — fair    : 8+ chars, only 1 char class
+    3 — good    : 8+ chars, 2–3 char classes
+    4 — strong  : 8+ chars, all 4 char classes (upper+lower+digit+symbol)
+  */
+  const strength = useMemo(() => {
+    const p = form.password;
+    if (!p) return 0;
+    if (p.length < 8) return 1;
+    let score = 0;
+    if (/[a-z]/.test(p)) score++;
+    if (/[A-Z]/.test(p)) score++;
+    if (/[0-9]/.test(p)) score++;
+    if (/[^a-zA-Z0-9]/.test(p)) score++;
+    return Math.max(1, score);
+  }, [form.password]);
+
+  const strengthMeta = [
+    null,
+    { label: "Weak", color: "var(--gz-danger)", segments: 1 },
+    { label: "Fair", color: "#c9a227", segments: 2 },
+    { label: "Good", color: "var(--gz-olive-lt)", segments: 3 },
+    { label: "Strong", color: "var(--gz-emerald-lt)", segments: 4 },
+  ];
 
   const handleSignup = async (e) => {
     e.preventDefault();
     setError("");
-    const rules = getPasswordStrength(form.password);
-    if (rules.some((r) => !r.pass)) {
-      setError("Password does not meet all requirements.");
+    if (strength < 3) {
+      setError("Password too weak. Add uppercase, numbers, or symbols.");
+      return;
+    }
+    if (form.password !== form.confirmPassword) {
+      setError("Passwords do not match.");
       return;
     }
     setLoading(true);
@@ -61,163 +77,298 @@ export default function Signup() {
     }
   };
 
-  const pwRules = getPasswordStrength(form.password);
-  const pwScore = pwRules.filter((r) => r.pass).length;
-
   return (
     <div
-      className="relative min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center px-4 py-20"
-      style={{ backgroundImage: "url('/background.jpg')" }}
+      className="relative min-h-screen flex items-center justify-center px-4 py-16"
+      style={{ background: "var(--gz-bark)", paddingTop: "6rem" }}
     >
-      <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/40 to-zinc-950/95" />
+      {/* Radial glow */}
+      <div
+        className="absolute pointer-events-none"
+        style={{
+          width: "700px",
+          height: "700px",
+          borderRadius: "9999px",
+          background:
+            "radial-gradient(circle, rgba(45,106,79,0.1) 0%, transparent 70%)",
+          top: "50%",
+          left: "50%",
+          transform: "translate(-50%, -50%)",
+        }}
+      />
 
-      <div className="relative w-full max-w-sm">
-        {/* Top ornament */}
+      {/* ── SIGNUP CARD ── */}
+      <div
+        className="relative w-full max-w-lg rounded-2xl px-8 py-10"
+        style={{
+          background: "var(--gz-soil)",
+          border: "1px solid var(--gz-driftwood)",
+          boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
+        }}
+      >
+        {/* ── TOP ORNAMENT ── */}
         <div className="flex items-center gap-3 mb-8">
-          <div className="flex-1 h-px bg-amber-900/40" />
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-border)" }}
+          />
           <span
-            className="text-amber-500/90 text-xs tracking-[0.4em] uppercase"
-            style={cinzel}
+            style={{
+              fontFamily: "var(--font-display)",
+              fontSize: "0.75rem",
+              letterSpacing: "0.3em",
+              color: "var(--gz-emerald-lt)",
+              fontStyle: "italic",
+            }}
           >
-            Nomads
+            GroundZero
           </span>
-          <div className="flex-1 h-px bg-amber-900/40" />
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-border)" }}
+          />
         </div>
 
-        {/* Heading */}
+        {/* ── HEADING ── */}
         <h1
-          className="text-amber-200 text-3xl tracking-[0.2em] uppercase text-center mb-1"
-          style={{ ...cinzel, fontWeight: 700 }}
+          className="text-center mb-1"
+          style={{
+            fontFamily: "var(--font-display)",
+            fontWeight: 700,
+            fontSize: "2rem",
+            letterSpacing: "0.1em",
+            textTransform: "uppercase",
+            color: "var(--gz-cream)",
+          }}
         >
-          Pledge
+          Join the Network
         </h1>
         <p
-          className="text-amber-100/55 text-sm text-center italic mb-8"
-          style={garamond}
+          className="text-center italic mb-8"
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.9rem",
+            color: "var(--gz-sand)",
+            opacity: 0.6,
+          }}
         >
-          Swear your oath to the order
+          Create your distributor account
         </p>
 
-        <form onSubmit={handleSignup} className="space-y-4">
-          {/* Email */}
-          <div className="space-y-1">
-            <label className={labelClass} style={cinzel}>
-              Email
-            </label>
-            <input
-              name="email"
-              type="email"
-              placeholder="your@email.com"
-              onChange={handleChange}
-              className={inputClass}
-              style={{ ...garamond, fontSize: "1rem" }}
-            />
+        {/* ── FORM ── */}
+        <form onSubmit={handleSignup} className="flex flex-col gap-5">
+          {/* First + Last */}
+          <div className="grid grid-cols-2 gap-4">
+            <Field label="First Name">
+              <Input
+                value={form.firstName}
+                onChange={set("firstName")}
+                placeholder="Juan"
+                required
+              />
+            </Field>
+            <Field label="Last Name">
+              <Input
+                value={form.lastName}
+                onChange={set("lastName")}
+                placeholder="dela Cruz"
+                required
+              />
+            </Field>
           </div>
+
+          {/* Email */}
+          <Field label="Email">
+            <Input
+              type="email"
+              value={form.email}
+              onChange={set("email")}
+              placeholder="your@email.com"
+              required
+            />
+          </Field>
 
           {/* Password */}
-          <div className="space-y-1">
-            <label className={labelClass} style={cinzel}>
-              Password
-            </label>
-            <input
-              name="password"
+          <Field label="Password">
+            <Input
               type="password"
+              value={form.password}
+              onChange={set("password")}
               placeholder="············"
-              onChange={handleChange}
-              className={inputClass}
-              style={{ ...garamond, fontSize: "1rem" }}
+              required
             />
 
-            {/* Strength meter */}
-            {form.password.length > 0 && (
-              <div className="space-y-2 pt-1">
-                <div className="flex items-center gap-2">
-                  <div className="flex-1 h-1 bg-zinc-800">
-                    <div
-                      className={`h-1 transition-all duration-300 ${strengthColor[pwScore]}`}
-                      style={{ width: `${(pwScore / 5) * 100}%` }}
-                    />
+            {/* ── STRENGTH METER ── */}
+            {form.password.length > 0 &&
+              (() => {
+                const meta = strengthMeta[strength];
+                return (
+                  <div className="mt-2 flex flex-col gap-1.5">
+                    {/* 4 segment bar */}
+                    <div className="flex gap-1">
+                      {[1, 2, 3, 4].map((i) => (
+                        <div
+                          key={i}
+                          style={{
+                            flex: 1,
+                            height: "3px",
+                            borderRadius: "9999px",
+                            background:
+                              i <= meta.segments
+                                ? meta.color
+                                : "var(--gz-driftwood)",
+                            transition: "background 0.2s",
+                          }}
+                        />
+                      ))}
+                    </div>
+                    {/* Label + hint */}
+                    <div className="flex justify-between items-center">
+                      <span
+                        style={{
+                          fontFamily: "var(--font-ui)",
+                          fontSize: "0.58rem",
+                          letterSpacing: "0.15em",
+                          textTransform: "uppercase",
+                          color: meta.color,
+                        }}
+                      >
+                        {meta.label}
+                      </span>
+                      {strength < 3 && (
+                        <span
+                          style={{
+                            fontFamily: "var(--font-body)",
+                            fontSize: "0.7rem",
+                            color: "var(--gz-sand)",
+                            opacity: 0.45,
+                            fontStyle: "italic",
+                          }}
+                        >
+                          Add uppercase, numbers, or symbols
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <span className="text-xs text-zinc-400" style={cinzel}>
-                    {strengthLabel[pwScore]}
-                  </span>
-                </div>
-                <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                  {pwRules.map((r) => (
-                    <span
-                      key={r.label}
-                      className={`text-xs italic ${r.pass ? "text-amber-500/70" : "text-zinc-400"}`}
-                      style={garamond}
-                    >
-                      {r.pass ? "✓" : "✗"} {r.label}
-                    </span>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+                );
+              })()}
+          </Field>
 
-          {/* Divider */}
-          <div className="flex items-center gap-3 py-1">
-            <div className="flex-1 h-px bg-zinc-700" />
-            <span className="text-amber-700 text-xs">✦</span>
-            <div className="flex-1 h-px bg-zinc-700" />
+          {/* Confirm password */}
+          <Field label="Confirm Password">
+            <Input
+              type="password"
+              value={form.confirmPassword}
+              onChange={set("confirmPassword")}
+              placeholder="············"
+              required
+            />
+            {/* Mismatch hint */}
+            {form.confirmPassword.length > 0 &&
+              form.password !== form.confirmPassword && (
+                <p
+                  style={{
+                    fontFamily: "var(--font-body)",
+                    fontSize: "0.72rem",
+                    fontStyle: "italic",
+                    color: "var(--gz-danger)",
+                    marginTop: "0.35rem",
+                    opacity: 0.8,
+                  }}
+                >
+                  Passwords don't match
+                </p>
+              )}
+          </Field>
+
+          {/* Security divider */}
+          <div className="flex items-center gap-3 my-1">
+            <div
+              className="flex-1 h-px"
+              style={{ background: "var(--gz-driftwood)", opacity: 0.4 }}
+            />
+            <span
+              style={{
+                fontFamily: "var(--font-ui)",
+                fontSize: "0.55rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "var(--gz-driftwood)",
+              }}
+            >
+              Security
+            </span>
+            <div
+              className="flex-1 h-px"
+              style={{ background: "var(--gz-driftwood)", opacity: 0.4 }}
+            />
           </div>
 
           {/* Security question */}
-          <div className="space-y-1">
-            <label className={labelClass} style={cinzel}>
-              Security Question
-            </label>
-            <input
-              name="security_question"
-              placeholder="e.g. Name of your first pet"
-              onChange={handleChange}
-              className={inputClass}
-              style={{ ...garamond, fontSize: "1rem" }}
-            />
-          </div>
+          <Field label="Security Question">
+            <select
+              value={form.securityQuestion}
+              onChange={set("securityQuestion")}
+              required
+              style={{
+                fontFamily: "var(--font-body)",
+                fontSize: "0.88rem",
+                background: "var(--gz-bark)",
+                border: "1px solid var(--gz-driftwood)",
+                borderRadius: "0.5rem",
+                padding: "0.65rem 0.9rem",
+                color: form.securityQuestion
+                  ? "var(--gz-cream)"
+                  : "rgba(201,185,154,0.35)",
+                outline: "none",
+                width: "100%",
+                cursor: "pointer",
+                appearance: "none",
+                transition: "border-color 0.15s, box-shadow 0.15s",
+              }}
+              onFocus={(e) => {
+                e.target.style.borderColor = "var(--gz-emerald)";
+                e.target.style.boxShadow = "0 0 0 3px rgba(45,106,79,0.15)";
+              }}
+              onBlur={(e) => {
+                e.target.style.borderColor = "var(--gz-driftwood)";
+                e.target.style.boxShadow = "none";
+              }}
+            >
+              <option value="" disabled>
+                Select a question…
+              </option>
+              <option value="pet">What was your first pet's name?</option>
+              <option value="mother">What is your mother's maiden name?</option>
+              <option value="city">What city were you born in?</option>
+              <option value="school">
+                What was the name of your first school?
+              </option>
+              <option value="friend">
+                What is your oldest sibling's middle name?
+              </option>
+            </select>
+          </Field>
 
-          {/* Answer */}
-          <div className="space-y-1">
-            <label className={labelClass} style={cinzel}>
-              Answer
-            </label>
-            <input
-              name="security_answer"
-              type="password"
-              placeholder="············"
-              onChange={handleChange}
-              className={inputClass}
-              style={{ ...garamond, fontSize: "1rem" }}
+          {/* Security answer */}
+          <Field label="Answer">
+            <Input
+              value={form.securityAnswer}
+              onChange={set("securityAnswer")}
+              placeholder="Your answer"
+              required
             />
-          </div>
-
-          {/* Hint */}
-          <div className="space-y-1">
-            <label className={labelClass} style={cinzel}>
-              Hint{" "}
-              <span
-                className="text-zinc-400 normal-case not-italic"
-                style={garamond}
-              >
-                (optional)
-              </span>
-            </label>
-            <input
-              name="security_hint"
-              placeholder="A subtle clue..."
-              onChange={handleChange}
-              className={inputClass}
-              style={{ ...garamond, fontSize: "1rem" }}
-            />
-          </div>
+          </Field>
 
           {/* Error */}
           {error && (
             <p
-              className="text-red-400/80 text-sm italic text-center"
-              style={garamond}
+              className="text-center italic text-sm"
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "var(--gz-danger)",
+                opacity: 0.85,
+              }}
             >
               {error}
             </p>
@@ -227,33 +378,140 @@ export default function Signup() {
           <button
             type="submit"
             disabled={loading}
-            className="w-full py-3 mt-2 bg-amber-700 hover:bg-amber-600 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 text-xs tracking-[0.2em] uppercase transition-all duration-200 hover:shadow-lg hover:shadow-amber-900/30"
-            style={{ ...cinzel, fontWeight: 700 }}
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontWeight: 700,
+              fontSize: "0.68rem",
+              letterSpacing: "0.22em",
+              textTransform: "uppercase",
+              padding: "0.85rem",
+              marginTop: "0.25rem",
+              background: loading
+                ? "var(--gz-emerald-dim)"
+                : "var(--gz-emerald)",
+              color: "var(--gz-cream)",
+              border: "none",
+              borderRadius: "0.5rem",
+              cursor: loading ? "not-allowed" : "pointer",
+              opacity: loading ? 0.6 : 1,
+              transition: "background 0.15s, opacity 0.15s",
+              boxShadow: "0 4px 16px rgba(45,106,79,0.3)",
+            }}
+            onMouseEnter={(e) => {
+              if (!loading)
+                e.currentTarget.style.background = "var(--gz-emerald-lt)";
+            }}
+            onMouseLeave={(e) => {
+              if (!loading)
+                e.currentTarget.style.background = "var(--gz-emerald)";
+            }}
           >
-            {loading ? "Binding oath..." : "Swear Allegiance"}
+            {loading ? "Creating Account..." : "Create Account"}
           </button>
         </form>
 
-        {/* Bottom */}
-        <div className="flex items-center gap-3 mt-8 mb-4">
-          <div className="flex-1 h-px bg-zinc-800" />
-          <span className="text-zinc-700 text-xs">✦</span>
-          <div className="flex-1 h-px bg-zinc-800" />
+        {/* ── BOTTOM LINK ── */}
+        <div className="flex items-center gap-3 mt-8 mb-5">
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-driftwood)", opacity: 0.4 }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontSize: "0.55rem",
+              color: "var(--gz-driftwood)",
+            }}
+          >
+            ✦
+          </span>
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-driftwood)", opacity: 0.4 }}
+          />
         </div>
 
         <p
-          className="text-center text-zinc-400 text-sm italic"
-          style={garamond}
+          className="text-center italic text-sm"
+          style={{
+            fontFamily: "var(--font-body)",
+            color: "var(--gz-sand)",
+            opacity: 0.55,
+          }}
         >
-          Already sworn in?{" "}
+          Already have an account?{" "}
           <Link
             to="/login"
-            className="text-amber-600/80 hover:text-amber-500 not-italic transition-colors"
+            style={{
+              fontStyle: "normal",
+              color: "var(--gz-emerald-lt)",
+              textDecoration: "none",
+              transition: "color 0.15s",
+            }}
+            onMouseEnter={(e) =>
+              (e.currentTarget.style.color = "var(--gz-olive-lt)")
+            }
+            onMouseLeave={(e) =>
+              (e.currentTarget.style.color = "var(--gz-emerald-lt)")
+            }
           >
-            Enter the order
+            Sign in
           </Link>
         </p>
       </div>
     </div>
+  );
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label
+        style={{
+          fontFamily: "var(--font-ui)",
+          fontSize: "0.62rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--gz-olive-lt)",
+        }}
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function Input({ type = "text", value, onChange, placeholder, required }) {
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required={required}
+      style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.95rem",
+        background: "var(--gz-bark)",
+        border: "1px solid var(--gz-driftwood)",
+        borderRadius: "0.5rem",
+        padding: "0.65rem 0.9rem",
+        color: "var(--gz-cream)",
+        outline: "none",
+        width: "100%",
+        transition: "border-color 0.15s, box-shadow 0.15s",
+      }}
+      onFocus={(e) => {
+        e.target.style.borderColor = "var(--gz-emerald)";
+        e.target.style.boxShadow = "0 0 0 3px rgba(45,106,79,0.15)";
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = "var(--gz-driftwood)";
+        e.target.style.boxShadow = "none";
+      }}
+    />
   );
 }

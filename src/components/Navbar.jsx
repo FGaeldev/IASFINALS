@@ -3,6 +3,16 @@ import { NavLink } from "react-router-dom";
 import useAuth from "../hooks/useAuth";
 import { logout } from "../services/authService";
 
+/*
+  Navbar.jsx — GroundZero
+  ─────────────────────────────────────────────────────────────────────
+  Theme   : Homely / Tropical
+  Layout  : Floating pill/capsule — centered, not full-width
+            Sits ~16px from top, auto-width, max-width capped
+            Mobile: full-width pill with hamburger → dropdown below
+  Palette : --gz-* tokens from index.css
+  Fonts   : Playfair Display (logo) · Josefin Sans (links)
+*/
 export default function Navbar() {
   const user = useAuth();
   const [open, setOpen] = useState(false);
@@ -12,136 +22,256 @@ export default function Navbar() {
     if (res.success) window.location.href = "/login";
   };
 
-  const linkStyle = ({ isActive }) =>
-    `text-xs tracking-widest uppercase transition font-normal ${
-      isActive ? "text-amber-400" : "text-amber-100/60 hover:text-amber-200"
-    }`;
-
-  const mobileLink = ({ isActive }) =>
-    `text-xs tracking-widest uppercase transition block py-1 border-b border-zinc-800 ${
-      isActive ? "text-amber-400" : "text-amber-100/60 hover:text-amber-200"
-    }`;
-
   return (
-    <nav className="fixed top-0 left-0 right-0 z-50 bg-zinc-950/90 backdrop-blur-sm border-b border-zinc-800">
-      <div className="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
-        {/* LOGO */}
-        <NavLink
-          to="/"
-          className="text-amber-400 text-lg tracking-[0.3em] uppercase"
-          style={{ fontFamily: "'Cinzel', serif", fontWeight: 700 }}
+    <>
+      {/* ── FLOATING PILL ── */}
+      <div
+        className="fixed top-4 left-0 right-0 z-50 flex justify-center px-4"
+        style={{ pointerEvents: "none" }}
+      >
+        <nav
+          className="flex items-center justify-between gap-6 px-5 backdrop-blur-md"
+          style={{
+            pointerEvents: "auto",
+            background: "rgba(30,32,24,0.88)",
+            border: "1px solid var(--gz-driftwood)",
+            borderRadius: "9999px",
+            height: "3rem",
+            width: "100%",
+            maxWidth: "680px",
+            boxShadow: "0 8px 32px rgba(0,0,0,0.45), 0 1px 0 rgba(96,108,56,0.15) inset",
+          }}
         >
-          NOMADS|UMS
-        </NavLink>
-
-        {/* DESKTOP LINKS */}
-        <div className="hidden md:flex items-center gap-8">
-          {user === undefined && (
-            <span className="text-xs text-zinc-400 tracking-widest uppercase">
-              ···
+          {/* ── LOGO ── */}
+          <NavLink
+            to="/"
+            style={{ textDecoration: "none", flexShrink: 0 }}
+            className="flex items-baseline gap-1.5"
+          >
+            <span
+              style={{
+                fontFamily: "var(--font-display)",
+                fontWeight: 900,
+                fontSize: "0.95rem",
+                letterSpacing: "0.15em",
+                textTransform: "uppercase",
+                color: "var(--gz-cream)",
+              }}
+            >
+              Ground<span style={{ color: "var(--gz-emerald-lt)" }}>Zero</span>
             </span>
-          )}
+            <span
+              style={{
+                fontFamily: "var(--font-ui)",
+                fontWeight: 300,
+                fontSize: "0.52rem",
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "var(--gz-olive-lt)",
+                opacity: 0.6,
+              }}
+            >
+              UMS
+            </span>
+          </NavLink>
 
-          {user === null && (
-            <>
-              <NavLink to="/login" className={linkStyle}>
-                Login
-              </NavLink>
-              <NavLink to="/signup" className={linkStyle}>
-                Sign Up
-              </NavLink>
-            </>
-          )}
+          {/* ── DESKTOP LINKS ── */}
+          <div className="hidden md:flex items-center gap-5">
 
-          {user && (
-            <>
-              {user.role === "admin" && (
-                <NavLink to="/admin" className={linkStyle}>
-                  Admin
+            {/* Auth resolving */}
+            {user === undefined && (
+              <span style={{ fontFamily: "var(--font-ui)", fontSize: "0.6rem", color: "var(--gz-driftwood)", letterSpacing: "0.2em" }}>
+                ···
+              </span>
+            )}
+
+            {/* Logged out */}
+            {user === null && (
+              <>
+                <NavLink to="/login" style={({ isActive }) => ghostLink(isActive)}>
+                  Login
                 </NavLink>
-              )}
-              <NavLink to="/profile" className={linkStyle}>
-                Profile
-              </NavLink>
-              <button
-                onClick={handleLogout}
-                className="text-xs tracking-widest uppercase text-red-400/60 hover:text-red-400 transition"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-
-        {/* MOBILE HAMBURGER */}
-        <button
-          onClick={() => setOpen(!open)}
-          className="md:hidden flex flex-col gap-1.5 p-1"
-        >
-          <span
-            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "rotate-45 translate-y-2" : ""}`}
-          />
-          <span
-            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "opacity-0" : ""}`}
-          />
-          <span
-            className={`block w-5 h-px bg-amber-200/60 transition-all ${open ? "-rotate-45 -translate-y-2" : ""}`}
-          />
-        </button>
-      </div>
-
-      {/* MOBILE DROPDOWN */}
-      {open && (
-        <div className="md:hidden bg-zinc-950 border-t border-zinc-800 px-6 py-4 flex flex-col gap-3">
-          {user === null && (
-            <>
-              <NavLink
-                to="/login"
-                onClick={() => setOpen(false)}
-                className={mobileLink}
-              >
-                Login
-              </NavLink>
-              <NavLink
-                to="/signup"
-                onClick={() => setOpen(false)}
-                className={mobileLink}
-              >
-                Sign Up
-              </NavLink>
-            </>
-          )}
-          {user && (
-            <>
-              {user.role === "admin" && (
+                {/* Sign Up gets a solid pill-within-pill treatment */}
                 <NavLink
-                  to="/admin"
-                  onClick={() => setOpen(false)}
-                  className={mobileLink}
+                  to="/signup"
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontSize: "0.62rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    textDecoration: "none",
+                    padding: "0.35rem 0.9rem",
+                    background: "var(--gz-emerald)",
+                    color: "var(--gz-cream)",
+                    borderRadius: "9999px",
+                    transition: "background 0.15s",
+                    whiteSpace: "nowrap",
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.background = "var(--gz-emerald-lt)"}
+                  onMouseLeave={e => e.currentTarget.style.background = "var(--gz-emerald)"}
                 >
-                  Admin
+                  Sign Up
                 </NavLink>
-              )}
-              <NavLink
-                to="/profile"
-                onClick={() => setOpen(false)}
-                className={mobileLink}
-              >
-                Profile
-              </NavLink>
-              <button
-                onClick={() => {
-                  setOpen(false);
-                  handleLogout();
+              </>
+            )}
+
+            {/* Logged in */}
+            {user && (
+              <>
+                {user.role === "admin" && (
+                  <NavLink to="/admin" style={({ isActive }) => ghostLink(isActive)}>
+                    Admin
+                  </NavLink>
+                )}
+                <NavLink to="/profile" style={({ isActive }) => ghostLink(isActive)}>
+                  Profile
+                </NavLink>
+                {/* Dot separator */}
+                <span style={{ width: "3px", height: "3px", borderRadius: "9999px", background: "var(--gz-driftwood)" }} />
+                <button
+                  onClick={handleLogout}
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontSize: "0.62rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    background: "none",
+                    border: "none",
+                    cursor: "pointer",
+                    color: "rgba(193,68,14,0.55)",
+                    transition: "color 0.15s",
+                    padding: 0,
+                  }}
+                  onMouseEnter={e => e.currentTarget.style.color = "var(--gz-danger)"}
+                  onMouseLeave={e => e.currentTarget.style.color = "rgba(193,68,14,0.55)"}
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+
+          {/* ── MOBILE HAMBURGER ── */}
+          <button
+            onClick={() => setOpen(!open)}
+            className="md:hidden flex flex-col justify-center gap-1.25"
+            style={{ background: "none", border: "none", cursor: "pointer", padding: "0.25rem", flexShrink: 0 }}
+            aria-label="Toggle navigation menu"
+          >
+            {[0, 1, 2].map(i => (
+              <span
+                key={i}
+                style={{
+                  display: "block",
+                  width: "1.1rem",
+                  height: "1px",
+                  background: "rgba(240,230,211,0.65)",
+                  transition: "transform 0.2s, opacity 0.2s",
+                  transform:
+                    open && i === 0 ? "rotate(45deg) translateY(6px)" :
+                    open && i === 2 ? "rotate(-45deg) translateY(-6px)" : "none",
+                  opacity: open && i === 1 ? 0 : 1,
                 }}
-                className="text-xs tracking-widest uppercase text-red-400/60 hover:text-red-400 transition text-left py-1"
-              >
-                Logout
-              </button>
-            </>
-          )}
-        </div>
-      )}
-    </nav>
+              />
+            ))}
+          </button>
+        </nav>
+
+        {/* ── MOBILE DROPDOWN — hangs below pill ── */}
+        {open && (
+          <div
+            className="md:hidden absolute"
+            style={{
+              top: "3.75rem",
+              width: "calc(100% - 2rem)",
+              maxWidth: "680px",
+              background: "rgba(30,32,24,0.96)",
+              border: "1px solid var(--gz-driftwood)",
+              borderRadius: "1.25rem",
+              padding: "1.25rem 1.5rem",
+              display: "flex",
+              flexDirection: "column",
+              gap: "0.75rem",
+              boxShadow: "0 12px 40px rgba(0,0,0,0.5)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
+            {user === null && (
+              <>
+                <MobileLink to="/login" onClick={() => setOpen(false)}>Login</MobileLink>
+                <MobileLink to="/signup" onClick={() => setOpen(false)}>Sign Up</MobileLink>
+              </>
+            )}
+            {user && (
+              <>
+                {user.role === "admin" && (
+                  <MobileLink to="/admin" onClick={() => setOpen(false)}>Admin</MobileLink>
+                )}
+                <MobileLink to="/profile" onClick={() => setOpen(false)}>Profile</MobileLink>
+                <button
+                  onClick={() => { setOpen(false); handleLogout(); }}
+                  style={{
+                    fontFamily: "var(--font-ui)",
+                    fontSize: "0.68rem",
+                    letterSpacing: "0.18em",
+                    textTransform: "uppercase",
+                    background: "none",
+                    border: "none",
+                    borderTop: "1px solid var(--gz-driftwood)",
+                    cursor: "pointer",
+                    color: "rgba(193,68,14,0.6)",
+                    textAlign: "left",
+                    paddingTop: "0.75rem",
+                    marginTop: "0.25rem",
+                  }}
+                >
+                  Logout
+                </button>
+              </>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+/** Desktop ghost link — active emerald, idle sand/muted */
+function ghostLink(isActive) {
+  return {
+    fontFamily: "var(--font-ui)",
+    fontSize: "0.62rem",
+    letterSpacing: "0.18em",
+    textTransform: "uppercase",
+    textDecoration: "none",
+    color: isActive ? "var(--gz-emerald-lt)" : "rgba(201,185,154,0.5)",
+    transition: "color 0.15s",
+    whiteSpace: "nowrap",
+  };
+}
+
+/** Mobile dropdown link */
+function MobileLink({ to, onClick, children }) {
+  return (
+    <NavLink
+      to={to}
+      onClick={onClick}
+      style={({ isActive }) => ({
+        fontFamily: "var(--font-ui)",
+        fontSize: "0.68rem",
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+        textDecoration: "none",
+        display: "block",
+        padding: "0.4rem 0",
+        borderBottom: "1px solid rgba(74,74,56,0.4)",
+        color: isActive ? "var(--gz-emerald-lt)" : "rgba(201,185,154,0.55)",
+        transition: "color 0.15s",
+      })}
+    >
+      {children}
+    </NavLink>
   );
 }
