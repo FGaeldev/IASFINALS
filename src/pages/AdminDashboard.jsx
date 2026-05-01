@@ -221,7 +221,7 @@ export default function AdminDashboard() {
           DESKTOP SIDEBAR — hidden on mobile
       ══════════════════════════════════════════ */}
       <aside
-        className="hidden md:flex flex-col sticky top-14 h-[calc(100vh-3.5rem)] flex-shrink-0"
+        className="hidden md:flex flex-col sticky top-14 h-[calc(100vh-3.5rem)] shrink-0"
         style={{
           width: "220px",
           background: "var(--gz-soil)",
