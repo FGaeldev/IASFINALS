@@ -1,18 +1,17 @@
 import { useState, useEffect } from "react";
-import {
-  getProfile,
-  update2fa,
-  logout,
-  changePassword,
-} from "../services/authService";
+import { getProfile, update2fa, changePassword } from "../services/authService";
 
-const cinzel = { fontFamily: "'Cinzel', serif" };
-const garamond = { fontFamily: "'EB Garamond', serif" };
+/*
+  UserDashboard.jsx — GroundZero
+  ─────────────────────────────────────────────────────────────────────
+  Theme   : Homely / Tropical — Bento card layout
+  Logic   : Unchanged — getProfile, update2fa, changePassword
+  Sections: Email identity · Password (inline edit) · 2FA (inline edit)
+  Palette : --gz-* tokens from index.css
+  Fonts   : Playfair Display (headings) · Josefin Sans (labels) · Lato (inputs)
+*/
 
-const inputClass =
-  "w-full px-4 py-2.5 bg-zinc-900 border border-zinc-700 hover:border-zinc-600 focus:border-amber-700 focus:outline-none focus:ring-1 focus:ring-amber-700/50 text-amber-50 placeholder-zinc-500 transition-colors";
-const labelClass = "text-amber-500/90 text-xs tracking-widest uppercase";
-
+/* ── Password strength rules — 5 criteria, 0–5 score ── */
 function getPasswordStrength(pw) {
   return [
     { pass: pw.length >= 8, label: "8+ chars" },
@@ -23,20 +22,20 @@ function getPasswordStrength(pw) {
   ];
 }
 
-const strengthLabel = ["", "Feeble", "Weak", "Decent", "Strong", "Formidable"];
+const strengthLabel = ["", "Weak", "Fair", "Decent", "Good", "Strong"];
 const strengthColor = [
   "",
-  "bg-red-700",
-  "bg-orange-600",
-  "bg-yellow-500",
-  "bg-lime-500",
-  "bg-amber-500",
+  "var(--gz-danger)",
+  "#c9a227",
+  "#c9a227",
+  "var(--gz-olive-lt)",
+  "var(--gz-emerald-lt)",
 ];
 
 export default function UserDashboard() {
   const [profile, setProfile] = useState(null);
 
-  // 2FA state
+  /* ── 2FA state ── */
   const [form, setForm] = useState({
     security_question: "",
     security_answer: "",
@@ -47,7 +46,7 @@ export default function UserDashboard() {
   const [oathError, setOathError] = useState("");
   const [oathLoading, setOathLoading] = useState(false);
 
-  // Password state
+  /* ── Password state ── */
   const [pwForm, setPwForm] = useState({
     current_password: "",
     new_password: "",
@@ -86,7 +85,7 @@ export default function UserDashboard() {
     const res = await update2fa(form);
     setOathLoading(false);
     if (res.success) {
-      setOathMsg("Oath resworn. Security question updated.");
+      setOathMsg("Security question updated.");
       setEditing(false);
       setProfile((p) => ({
         ...p,
@@ -103,14 +102,14 @@ export default function UserDashboard() {
     setPwMsg("");
     setPwError("");
     if (pwForm.new_password !== pwForm.confirm_password) {
-      setPwError("Passwords do not match");
+      setPwError("Passwords do not match.");
       return;
     }
     setPwLoading(true);
     const res = await changePassword(pwForm);
     setPwLoading(false);
     if (res.success) {
-      setPwMsg("Cipher reforged. Password updated.");
+      setPwMsg("Password updated.");
       setPwEditing(false);
       setPwForm({
         current_password: "",
@@ -129,335 +128,557 @@ export default function UserDashboard() {
 
   return (
     <div
-      className="relative min-h-screen bg-cover bg-center bg-fixed flex items-center justify-center px-4 py-20"
-      style={{ backgroundImage: "url('/background.jpg')" }}
+      className="min-h-screen px-4 py-8"
+      style={{ background: "var(--gz-bark)", paddingTop: "5.5rem" }}
     >
-      <div className="absolute inset-0 bg-linear-to-b from-zinc-950/80 via-zinc-950/50 to-zinc-950/95" />
-
-      <div className="relative w-full max-w-sm">
-        {/* Top ornament */}
-        <div className="flex items-center gap-3 mb-8">
-          <div className="flex-1 h-px bg-amber-900/40" />
-          <span
-            className="text-amber-500/90 text-xs tracking-[0.4em] uppercase"
-            style={cinzel}
+      <div className="max-w-2xl mx-auto flex flex-col gap-4">
+        {/* ── PAGE HEADER ── */}
+        <div className="flex items-center gap-3 mb-2">
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-border)" }}
+          />
+          <h1
+            style={{
+              fontFamily: "var(--font-display)",
+              fontWeight: 700,
+              fontSize: "1.6rem",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "var(--gz-cream)",
+            }}
           >
-            Nomads
-          </span>
-          <div className="flex-1 h-px bg-amber-900/40" />
+            Profile
+          </h1>
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-border)" }}
+          />
         </div>
-
-        <h1
-          className="text-amber-200 text-3xl tracking-[0.2em] uppercase text-center mb-1"
-          style={{ ...cinzel, fontWeight: 700 }}
-        >
-          Dossier
-        </h1>
         <p
-          className="text-amber-100/55 text-sm text-center italic mb-8"
-          style={garamond}
+          className="text-center italic mb-4"
+          style={{
+            fontFamily: "var(--font-body)",
+            fontSize: "0.88rem",
+            color: "var(--gz-sand)",
+            opacity: 0.55,
+          }}
         >
-          Your standing within the order
+          Your account settings
         </p>
 
-        <div className="space-y-6">
-          {/* EMAIL */}
-          <div className="border border-zinc-800 bg-zinc-900/60 px-5 py-4">
-            <p className={`${labelClass} mb-2`} style={cinzel}>
-              Sworn Identity
-            </p>
-            <p className="text-amber-100 text-base" style={garamond}>
-              {profile.u_email}
-            </p>
+        {/* ── BENTO: EMAIL IDENTITY ── */}
+        <BentoCard>
+          <SectionLabel>Account</SectionLabel>
+          <p
+            style={{
+              fontFamily: "var(--font-body)",
+              fontSize: "1rem",
+              color: "var(--gz-cream)",
+              marginTop: "0.5rem",
+            }}
+          >
+            {profile.u_email}
+          </p>
+          <p
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontSize: "0.6rem",
+              letterSpacing: "0.15em",
+              textTransform: "uppercase",
+              color: "var(--gz-driftwood)",
+              marginTop: "0.35rem",
+            }}
+          >
+            Role: {profile.u_role ?? "user"}
+          </p>
+        </BentoCard>
+
+        {/* ── BENTO: PASSWORD ── */}
+        <BentoCard>
+          <div className="flex justify-between items-center">
+            <SectionLabel>Password</SectionLabel>
+            {!pwEditing && (
+              <GhostButton onClick={() => setPwEditing(true)}>
+                Change
+              </GhostButton>
+            )}
           </div>
 
-          {/* PASSWORD SECTION */}
-          <div className="border border-zinc-800 bg-zinc-900/60 px-5 py-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <p className={labelClass} style={cinzel}>
-                Cipher (Password)
-              </p>
-              {!pwEditing && (
-                <button
-                  onClick={() => setPwEditing(true)}
-                  className="text-xs tracking-widest uppercase px-3 py-1 border border-amber-800/50 text-amber-500/80 hover:border-amber-600 hover:text-amber-400 transition-colors"
-                  style={cinzel}
-                >
-                  Reforge
-                </button>
-              )}
-            </div>
-
-            {!pwEditing ? (
-              <p className="text-zinc-600 text-sm italic" style={garamond}>
-                ············
-              </p>
-            ) : (
-              <form onSubmit={handleChangePassword} className="space-y-4 pt-1">
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    Current Password
-                  </label>
-                  <input
-                    name="current_password"
-                    type="password"
-                    value={pwForm.current_password}
-                    onChange={handlePwChange}
-                    placeholder="············"
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                </div>
-
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    New Password
-                  </label>
-                  <input
-                    name="new_password"
-                    type="password"
-                    value={pwForm.new_password}
-                    onChange={handlePwChange}
-                    placeholder="············"
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                  {/* Strength meter */}
-                  {pwForm.new_password.length > 0 && (
-                    <div className="space-y-2 pt-1">
-                      <div className="flex items-center gap-2">
-                        <div className="flex-1 h-1 bg-zinc-800">
+          {!pwEditing ? (
+            <p
+              style={{
+                fontFamily: "var(--font-body)",
+                color: "var(--gz-driftwood)",
+                marginTop: "0.5rem",
+                letterSpacing: "0.15em",
+              }}
+            >
+              ············
+            </p>
+          ) : (
+            <form
+              onSubmit={handleChangePassword}
+              className="flex flex-col gap-4 mt-4"
+            >
+              <Field label="Current Password">
+                <Input
+                  name="current_password"
+                  type="password"
+                  value={pwForm.current_password}
+                  onChange={handlePwChange}
+                  placeholder="············"
+                  required
+                />
+              </Field>
+              <Field label="New Password">
+                <Input
+                  name="new_password"
+                  type="password"
+                  value={pwForm.new_password}
+                  onChange={handlePwChange}
+                  placeholder="············"
+                  required
+                />
+                {/* Strength meter */}
+                {pwForm.new_password.length > 0 && (
+                  <div className="mt-2 flex flex-col gap-2">
+                    {/* Bar */}
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 flex gap-1">
+                        {[1, 2, 3, 4, 5].map((i) => (
                           <div
-                            className={`h-1 transition-all duration-300 ${strengthColor[pwScore]}`}
-                            style={{ width: `${(pwScore / 5) * 100}%` }}
+                            key={i}
+                            style={{
+                              flex: 1,
+                              height: "3px",
+                              borderRadius: "9999px",
+                              background:
+                                i <= pwScore
+                                  ? strengthColor[pwScore]
+                                  : "var(--gz-driftwood)",
+                              transition: "background 0.2s",
+                            }}
                           />
-                        </div>
-                        <span className="text-xs text-zinc-500" style={cinzel}>
-                          {strengthLabel[pwScore]}
-                        </span>
-                      </div>
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-1">
-                        {pwRules.map((r) => (
-                          <span
-                            key={r.label}
-                            className={`text-xs italic ${r.pass ? "text-amber-500/70" : "text-zinc-600"}`}
-                            style={garamond}
-                          >
-                            {r.pass ? "✓" : "✗"} {r.label}
-                          </span>
                         ))}
                       </div>
+                      <span
+                        style={{
+                          fontFamily: "var(--font-ui)",
+                          fontSize: "0.58rem",
+                          letterSpacing: "0.12em",
+                          textTransform: "uppercase",
+                          color: strengthColor[pwScore],
+                        }}
+                      >
+                        {strengthLabel[pwScore]}
+                      </span>
                     </div>
-                  )}
-                </div>
-
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    Confirm Password
-                  </label>
-                  <input
-                    name="confirm_password"
-                    type="password"
-                    value={pwForm.confirm_password}
-                    onChange={handlePwChange}
-                    placeholder="············"
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                </div>
-
-                {pwError && (
-                  <p
-                    className="text-red-400/80 text-sm italic"
-                    style={garamond}
-                  >
-                    {pwError}
-                  </p>
-                )}
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="submit"
-                    disabled={pwLoading}
-                    className="flex-1 py-2.5 bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-zinc-950 text-xs tracking-[0.2em] uppercase transition-colors"
-                    style={{ ...cinzel, fontWeight: 700 }}
-                  >
-                    {pwLoading ? "Forging..." : "Reforge Cipher"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setPwEditing(false);
-                      setPwError("");
-                      setPwForm({
-                        current_password: "",
-                        new_password: "",
-                        confirm_password: "",
-                      });
-                    }}
-                    className="flex-1 py-2.5 border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-zinc-200 text-xs tracking-[0.2em] uppercase transition-colors"
-                    style={cinzel}
-                  >
-                    Withdraw
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {pwMsg && (
-              <p
-                className="text-amber-500/70 text-sm italic text-center"
-                style={garamond}
-              >
-                {pwMsg}
-              </p>
-            )}
-          </div>
-
-          {/* 2FA SECTION */}
-          <div className="border border-zinc-800 bg-zinc-900/60 px-5 py-4 space-y-3">
-            <div className="flex justify-between items-center">
-              <p className={labelClass} style={cinzel}>
-                Secret Oath (2FA)
-              </p>
-              {!editing && (
-                <button
-                  onClick={() => setEditing(true)}
-                  className="text-xs tracking-widest uppercase px-3 py-1 border border-amber-800/50 text-amber-500/80 hover:border-amber-600 hover:text-amber-400 transition-colors"
-                  style={cinzel}
-                >
-                  Amend
-                </button>
-              )}
-            </div>
-
-            {!editing ? (
-              <div className="space-y-2">
-                <p
-                  className="text-amber-100/80 text-base italic"
-                  style={garamond}
-                >
-                  {profile.u_security_question}
-                </p>
-                {profile.u_security_hint && (
-                  <div className="group flex items-center gap-2 cursor-default select-none">
-                    <span
-                      className="text-zinc-600 text-xs tracking-widest uppercase border-b border-dashed border-zinc-700"
-                      style={cinzel}
-                    >
-                      Hint
-                    </span>
-                    <span className="relative text-sm italic" style={garamond}>
-                      <span className="absolute inset-0 text-zinc-500 group-hover:opacity-0 transition-opacity duration-300">
-                        ~~~~~~~~
-                      </span>
-                      <span className="text-zinc-300 opacity-0 blur-sm group-hover:opacity-100 group-hover:blur-none transition-all duration-300">
-                        {profile.u_security_hint}
-                      </span>
-                    </span>
+                    {/* Checklist */}
+                    <div className="grid grid-cols-2 gap-x-4 gap-y-1">
+                      {pwRules.map((r) => (
+                        <span
+                          key={r.label}
+                          style={{
+                            fontFamily: "var(--font-body)",
+                            fontSize: "0.72rem",
+                            fontStyle: "italic",
+                            color: r.pass
+                              ? "var(--gz-olive-lt)"
+                              : "var(--gz-driftwood)",
+                          }}
+                        >
+                          {r.pass ? "✓" : "✗"} {r.label}
+                        </span>
+                      ))}
+                    </div>
                   </div>
                 )}
-              </div>
-            ) : (
-              <form onSubmit={handleSaveOath} className="space-y-4 pt-1">
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    New Question
-                  </label>
-                  <input
-                    name="security_question"
-                    value={form.security_question}
-                    onChange={handleChange}
-                    placeholder="Your secret question..."
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    New Answer
-                  </label>
-                  <input
-                    name="security_answer"
-                    type="password"
-                    value={form.security_answer}
-                    onChange={handleChange}
-                    placeholder="············"
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                </div>
-                <div className="space-y-1">
-                  <label className={labelClass} style={cinzel}>
-                    Hint{" "}
-                    <span
-                      className="text-zinc-600 normal-case"
-                      style={garamond}
+              </Field>
+              <Field label="Confirm Password">
+                <Input
+                  name="confirm_password"
+                  type="password"
+                  value={pwForm.confirm_password}
+                  onChange={handlePwChange}
+                  placeholder="············"
+                  required
+                />
+                {pwForm.confirm_password.length > 0 &&
+                  pwForm.new_password !== pwForm.confirm_password && (
+                    <p
+                      style={{
+                        fontFamily: "var(--font-body)",
+                        fontSize: "0.72rem",
+                        fontStyle: "italic",
+                        color: "var(--gz-danger)",
+                        marginTop: "0.3rem",
+                      }}
                     >
-                      (optional)
-                    </span>
-                  </label>
-                  <input
-                    name="security_hint"
-                    value={form.security_hint}
-                    onChange={handleChange}
-                    placeholder="A subtle clue..."
-                    className={inputClass}
-                    style={{ ...garamond, fontSize: "1rem" }}
-                  />
-                </div>
+                      Passwords don't match
+                    </p>
+                  )}
+              </Field>
+              {pwError && <ErrorMsg>{pwError}</ErrorMsg>}
+              <ActionRow
+                submitLabel={pwLoading ? "Saving..." : "Update Password"}
+                loading={pwLoading}
+                onCancel={() => {
+                  setPwEditing(false);
+                  setPwError("");
+                  setPwForm({
+                    current_password: "",
+                    new_password: "",
+                    confirm_password: "",
+                  });
+                }}
+              />
+            </form>
+          )}
+          {pwMsg && <SuccessMsg>{pwMsg}</SuccessMsg>}
+        </BentoCard>
 
-                {oathError && (
-                  <p
-                    className="text-red-400/80 text-sm italic"
-                    style={garamond}
-                  >
-                    {oathError}
-                  </p>
-                )}
-
-                <div className="flex gap-2 pt-1">
-                  <button
-                    type="submit"
-                    disabled={oathLoading}
-                    className="flex-1 py-2.5 bg-amber-700 hover:bg-amber-600 disabled:opacity-50 text-zinc-950 text-xs tracking-[0.2em] uppercase transition-colors"
-                    style={{ ...cinzel, fontWeight: 700 }}
-                  >
-                    {oathLoading ? "Binding..." : "Reseal Oath"}
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setEditing(false);
-                      setOathError("");
-                    }}
-                    className="flex-1 py-2.5 border border-zinc-700 hover:border-zinc-500 text-zinc-400 hover:text-zinc-200 text-xs tracking-[0.2em] uppercase transition-colors"
-                    style={cinzel}
-                  >
-                    Withdraw
-                  </button>
-                </div>
-              </form>
-            )}
-
-            {oathMsg && (
-              <p
-                className="text-amber-500/70 text-sm italic text-center"
-                style={garamond}
-              >
-                {oathMsg}
-              </p>
+        {/* ── BENTO: 2FA / SECURITY QUESTION ── */}
+        <BentoCard>
+          <div className="flex justify-between items-center">
+            <SectionLabel>Security Question (2FA)</SectionLabel>
+            {!editing && (
+              <GhostButton onClick={() => setEditing(true)}>Edit</GhostButton>
             )}
           </div>
-        </div>
+
+          {!editing ? (
+            <div className="mt-3 flex flex-col gap-2">
+              <p
+                style={{
+                  fontFamily: "var(--font-body)",
+                  fontSize: "0.95rem",
+                  color: "var(--gz-cream)",
+                  lineHeight: 1.6,
+                }}
+              >
+                {profile.u_security_question}
+              </p>
+              {profile.u_security_hint && (
+                <div className="group flex items-center gap-2 cursor-default select-none mt-1">
+                  <span
+                    style={{
+                      fontFamily: "var(--font-ui)",
+                      fontSize: "0.58rem",
+                      letterSpacing: "0.2em",
+                      textTransform: "uppercase",
+                      color: "var(--gz-driftwood)",
+                    }}
+                  >
+                    Hint
+                  </span>
+                  <span
+                    className="relative text-sm italic"
+                    style={{ fontFamily: "var(--font-body)" }}
+                  >
+                    <span
+                      className="absolute inset-0 transition-opacity duration-300 group-hover:opacity-0"
+                      style={{ color: "var(--gz-driftwood)" }}
+                    >
+                      ~~~~~~
+                    </span>
+                    <span
+                      className="transition-all duration-300 opacity-0 blur-sm group-hover:opacity-100 group-hover:blur-none"
+                      style={{ color: "var(--gz-sand)" }}
+                    >
+                      {profile.u_security_hint}
+                    </span>
+                  </span>
+                </div>
+              )}
+            </div>
+          ) : (
+            <form
+              onSubmit={handleSaveOath}
+              className="flex flex-col gap-4 mt-4"
+            >
+              <Field label="New Question">
+                <Input
+                  name="security_question"
+                  value={form.security_question}
+                  onChange={handleChange}
+                  placeholder="Your secret question…"
+                  required
+                />
+              </Field>
+              <Field label="New Answer">
+                <Input
+                  name="security_answer"
+                  type="password"
+                  value={form.security_answer}
+                  onChange={handleChange}
+                  placeholder="············"
+                  required
+                />
+              </Field>
+              <Field label="Hint (optional)">
+                <Input
+                  name="security_hint"
+                  value={form.security_hint}
+                  onChange={handleChange}
+                  placeholder="A subtle clue…"
+                />
+              </Field>
+              {oathError && <ErrorMsg>{oathError}</ErrorMsg>}
+              <ActionRow
+                submitLabel={oathLoading ? "Saving..." : "Update Question"}
+                loading={oathLoading}
+                onCancel={() => {
+                  setEditing(false);
+                  setOathError("");
+                }}
+              />
+            </form>
+          )}
+          {oathMsg && <SuccessMsg>{oathMsg}</SuccessMsg>}
+        </BentoCard>
 
         {/* Bottom rule */}
-        <div className="flex items-center gap-3 mt-8">
-          <div className="flex-1 h-px bg-zinc-800" />
-          <span className="text-zinc-700 text-xs">✦</span>
-          <div className="flex-1 h-px bg-zinc-800" />
+        <div className="flex items-center gap-3 mt-2">
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-driftwood)", opacity: 0.3 }}
+          />
+          <span
+            style={{
+              fontFamily: "var(--font-ui)",
+              fontSize: "0.55rem",
+              color: "var(--gz-driftwood)",
+            }}
+          >
+            ✦
+          </span>
+          <div
+            className="flex-1 h-px"
+            style={{ background: "var(--gz-driftwood)", opacity: 0.3 }}
+          />
         </div>
       </div>
     </div>
+  );
+}
+
+/* ── Helpers ─────────────────────────────────────────────────────── */
+
+function BentoCard({ children }) {
+  return (
+    <div
+      className="rounded-2xl px-6 py-5"
+      style={{
+        background: "var(--gz-soil)",
+        border: "1px solid var(--gz-driftwood)",
+      }}
+    >
+      {children}
+    </div>
+  );
+}
+
+function SectionLabel({ children }) {
+  return (
+    <p
+      style={{
+        fontFamily: "var(--font-ui)",
+        fontSize: "0.62rem",
+        letterSpacing: "0.2em",
+        textTransform: "uppercase",
+        color: "var(--gz-olive-lt)",
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function Field({ label, children }) {
+  return (
+    <div className="flex flex-col gap-1.5">
+      <label
+        style={{
+          fontFamily: "var(--font-ui)",
+          fontSize: "0.62rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          color: "var(--gz-olive-lt)",
+        }}
+      >
+        {label}
+      </label>
+      {children}
+    </div>
+  );
+}
+
+function Input({
+  name,
+  type = "text",
+  value,
+  onChange,
+  placeholder,
+  required,
+}) {
+  return (
+    <input
+      name={name}
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      required={required}
+      style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.95rem",
+        background: "var(--gz-bark)",
+        border: "1px solid var(--gz-driftwood)",
+        borderRadius: "0.5rem",
+        padding: "0.65rem 0.9rem",
+        color: "var(--gz-cream)",
+        outline: "none",
+        width: "100%",
+        transition: "border-color 0.15s, box-shadow 0.15s",
+      }}
+      onFocus={(e) => {
+        e.target.style.borderColor = "var(--gz-emerald)";
+        e.target.style.boxShadow = "0 0 0 3px rgba(45,106,79,0.15)";
+      }}
+      onBlur={(e) => {
+        e.target.style.borderColor = "var(--gz-driftwood)";
+        e.target.style.boxShadow = "none";
+      }}
+    />
+  );
+}
+
+function GhostButton({ onClick, children }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        fontFamily: "var(--font-ui)",
+        fontSize: "0.6rem",
+        letterSpacing: "0.18em",
+        textTransform: "uppercase",
+        background: "none",
+        cursor: "pointer",
+        padding: "0.3rem 0.75rem",
+        color: "var(--gz-olive-lt)",
+        border: "1px solid var(--gz-border)",
+        borderRadius: "9999px",
+        transition: "border-color 0.15s, color 0.15s",
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.borderColor = "var(--gz-olive-lt)";
+        e.currentTarget.style.color = "var(--gz-cream)";
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = "var(--gz-border)";
+        e.currentTarget.style.color = "var(--gz-olive-lt)";
+      }}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ActionRow({ submitLabel, loading, onCancel }) {
+  return (
+    <div className="flex gap-2 pt-1">
+      <button
+        type="submit"
+        disabled={loading}
+        style={{
+          flex: 1,
+          fontFamily: "var(--font-ui)",
+          fontWeight: 700,
+          fontSize: "0.65rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          padding: "0.75rem",
+          background: loading ? "var(--gz-emerald-dim)" : "var(--gz-emerald)",
+          color: "var(--gz-cream)",
+          border: "none",
+          borderRadius: "0.5rem",
+          cursor: loading ? "not-allowed" : "pointer",
+          opacity: loading ? 0.6 : 1,
+          transition: "background 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          if (!loading)
+            e.currentTarget.style.background = "var(--gz-emerald-lt)";
+        }}
+        onMouseLeave={(e) => {
+          if (!loading) e.currentTarget.style.background = "var(--gz-emerald)";
+        }}
+      >
+        {submitLabel}
+      </button>
+      <button
+        type="button"
+        onClick={onCancel}
+        style={{
+          flex: 1,
+          fontFamily: "var(--font-ui)",
+          fontSize: "0.65rem",
+          letterSpacing: "0.2em",
+          textTransform: "uppercase",
+          padding: "0.75rem",
+          background: "none",
+          color: "rgba(201,185,154,0.45)",
+          border: "1px solid var(--gz-driftwood)",
+          borderRadius: "0.5rem",
+          cursor: "pointer",
+          transition: "border-color 0.15s, color 0.15s",
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = "var(--gz-olive-lt)";
+          e.currentTarget.style.color = "var(--gz-cream)";
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = "var(--gz-driftwood)";
+          e.currentTarget.style.color = "rgba(201,185,154,0.45)";
+        }}
+      >
+        Cancel
+      </button>
+    </div>
+  );
+}
+
+function ErrorMsg({ children }) {
+  return (
+    <p
+      style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.8rem",
+        fontStyle: "italic",
+        color: "var(--gz-danger)",
+        opacity: 0.85,
+      }}
+    >
+      {children}
+    </p>
+  );
+}
+
+function SuccessMsg({ children }) {
+  return (
+    <p
+      style={{
+        fontFamily: "var(--font-body)",
+        fontSize: "0.8rem",
+        fontStyle: "italic",
+        color: "var(--gz-emerald-lt)",
+        textAlign: "center",
+        marginTop: "0.5rem",
+      }}
+    >
+      {children}
+    </p>
   );
 }

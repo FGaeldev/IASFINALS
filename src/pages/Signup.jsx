@@ -6,20 +6,20 @@ import { signup } from "../services/authService";
   Signup.jsx — GroundZero
   ─────────────────────────────────────────────────────────────────────
   Theme   : Homely / Tropical — Bento-card signup form
-  Layout  : Centered card, wider than login (two-col fields on md+)
   Palette : --gz-* tokens from index.css
   Fonts   : Playfair Display (heading) · Josefin Sans (labels/btn) · Lato (inputs)
-  Password: Live strength meter — 4 segments, labeled, blocks weak submit
+  Keys    : Match authService.signup() — email, password, security_question,
+            security_answer, security_hint (optional)
+  Password: Live 4-segment strength meter, blocks weak submit (score < 3)
 */
 export default function Signup() {
   const [form, setForm] = useState({
-    firstName: "",
-    lastName: "",
     email: "",
     password: "",
     confirmPassword: "",
-    securityQuestion: "",
-    securityAnswer: "",
+    security_question: "",
+    security_answer: "",
+    security_hint: "",
   });
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,9 +32,9 @@ export default function Signup() {
     ─────────────────────────────────────────────────────────────────
     0 — empty
     1 — weak    : < 8 chars
-    2 — fair    : 8+ chars, only 1 char class
+    2 — fair    : 8+ chars, 1 char class
     3 — good    : 8+ chars, 2–3 char classes
-    4 — strong  : 8+ chars, all 4 char classes (upper+lower+digit+symbol)
+    4 — strong  : 8+ chars, all 4 classes (upper+lower+digit+symbol)
   */
   const strength = useMemo(() => {
     const p = form.password;
@@ -68,7 +68,14 @@ export default function Signup() {
       return;
     }
     setLoading(true);
-    const res = await signup(form);
+    /* Send only keys backend expects — strip confirmPassword */
+    const res = await signup({
+      email: form.email,
+      password: form.password,
+      security_question: form.security_question,
+      security_answer: form.security_answer,
+      security_hint: form.security_hint,
+    });
     setLoading(false);
     if (res.success) {
       window.location.href = "/login";
@@ -106,7 +113,7 @@ export default function Signup() {
           boxShadow: "0 24px 64px rgba(0,0,0,0.4)",
         }}
       >
-        {/* ── TOP ORNAMENT ── */}
+        {/* Ornament */}
         <div className="flex items-center gap-3 mb-8">
           <div
             className="flex-1 h-px"
@@ -129,7 +136,7 @@ export default function Signup() {
           />
         </div>
 
-        {/* ── HEADING ── */}
+        {/* Heading */}
         <h1
           className="text-center mb-1"
           style={{
@@ -157,26 +164,6 @@ export default function Signup() {
 
         {/* ── FORM ── */}
         <form onSubmit={handleSignup} className="flex flex-col gap-5">
-          {/* First + Last */}
-          <div className="grid grid-cols-2 gap-4">
-            <Field label="First Name">
-              <Input
-                value={form.firstName}
-                onChange={set("firstName")}
-                placeholder="Juan"
-                required
-              />
-            </Field>
-            <Field label="Last Name">
-              <Input
-                value={form.lastName}
-                onChange={set("lastName")}
-                placeholder="dela Cruz"
-                required
-              />
-            </Field>
-          </div>
-
           {/* Email */}
           <Field label="Email">
             <Input
@@ -197,14 +184,12 @@ export default function Signup() {
               placeholder="············"
               required
             />
-
-            {/* ── STRENGTH METER ── */}
+            {/* Strength meter */}
             {form.password.length > 0 &&
               (() => {
                 const meta = strengthMeta[strength];
                 return (
                   <div className="mt-2 flex flex-col gap-1.5">
-                    {/* 4 segment bar */}
                     <div className="flex gap-1">
                       {[1, 2, 3, 4].map((i) => (
                         <div
@@ -222,7 +207,6 @@ export default function Signup() {
                         />
                       ))}
                     </div>
-                    {/* Label + hint */}
                     <div className="flex justify-between items-center">
                       <span
                         style={{
@@ -263,7 +247,6 @@ export default function Signup() {
               placeholder="············"
               required
             />
-            {/* Mismatch hint */}
             {form.confirmPassword.length > 0 &&
               form.password !== form.confirmPassword && (
                 <p
@@ -307,8 +290,8 @@ export default function Signup() {
           {/* Security question */}
           <Field label="Security Question">
             <select
-              value={form.securityQuestion}
-              onChange={set("securityQuestion")}
+              value={form.security_question}
+              onChange={set("security_question")}
               required
               style={{
                 fontFamily: "var(--font-body)",
@@ -317,7 +300,7 @@ export default function Signup() {
                 border: "1px solid var(--gz-driftwood)",
                 borderRadius: "0.5rem",
                 padding: "0.65rem 0.9rem",
-                color: form.securityQuestion
+                color: form.security_question
                   ? "var(--gz-cream)"
                   : "rgba(201,185,154,0.35)",
                 outline: "none",
@@ -338,13 +321,19 @@ export default function Signup() {
               <option value="" disabled>
                 Select a question…
               </option>
-              <option value="pet">What was your first pet's name?</option>
-              <option value="mother">What is your mother's maiden name?</option>
-              <option value="city">What city were you born in?</option>
-              <option value="school">
+              <option value="What was your first pet's name?">
+                What was your first pet's name?
+              </option>
+              <option value="What is your mother's maiden name?">
+                What is your mother's maiden name?
+              </option>
+              <option value="What city were you born in?">
+                What city were you born in?
+              </option>
+              <option value="What was the name of your first school?">
                 What was the name of your first school?
               </option>
-              <option value="friend">
+              <option value="What is your oldest sibling's middle name?">
                 What is your oldest sibling's middle name?
               </option>
             </select>
@@ -353,10 +342,19 @@ export default function Signup() {
           {/* Security answer */}
           <Field label="Answer">
             <Input
-              value={form.securityAnswer}
-              onChange={set("securityAnswer")}
+              value={form.security_answer}
+              onChange={set("security_answer")}
               placeholder="Your answer"
               required
+            />
+          </Field>
+
+          {/* Hint (optional) */}
+          <Field label="Hint (optional)">
+            <Input
+              value={form.security_hint}
+              onChange={set("security_hint")}
+              placeholder="A small clue to jog your memory"
             />
           </Field>
 
@@ -410,7 +408,7 @@ export default function Signup() {
           </button>
         </form>
 
-        {/* ── BOTTOM LINK ── */}
+        {/* Bottom link */}
         <div className="flex items-center gap-3 mt-8 mb-5">
           <div
             className="flex-1 h-px"
@@ -430,7 +428,6 @@ export default function Signup() {
             style={{ background: "var(--gz-driftwood)", opacity: 0.4 }}
           />
         </div>
-
         <p
           className="text-center italic text-sm"
           style={{
@@ -446,7 +443,6 @@ export default function Signup() {
               fontStyle: "normal",
               color: "var(--gz-emerald-lt)",
               textDecoration: "none",
-              transition: "color 0.15s",
             }}
             onMouseEnter={(e) =>
               (e.currentTarget.style.color = "var(--gz-olive-lt)")
