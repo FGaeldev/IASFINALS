@@ -5,23 +5,44 @@
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
-    <!-- Preconnect to Google Fonts CDN for performance -->
+    <!--
+      Performance: preconnect to Google Fonts CDN before the
+      browser discovers the @import, shaving ~100-300ms off
+      first-paint on cold loads.
+    -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
     <!--
       Typography Stack — Schaden's Cosplay Shop
-      ─────────────────────────────────────────────────────────────────────
+      ─────────────────────────────────────────────────────────────────
       Display  : Playfair Display — editorial serif; magazine headlines
-      UI/Label : DM Sans         — clean modern sans; nav, labels, buttons
-      Logo     : Cinzel          — all-caps decorative; logo mark only
+                 and hero titles. Italic variant for pull-quotes.
+      UI/Label : DM Sans         — optical-size aware; nav, labels,
+                 buttons, body copy. Variable font for crisp rendering
+                 at small tracking-widest sizes.
+      Logo     : Cinzel          — all-caps Roman-inspired decorative;
+                 used exclusively on the brand logo mark.
+
+      Load strategy: display=swap prevents FOIT; weights are narrowed
+      to only what the design actually uses to minimize payload.
+      ─────────────────────────────────────────────────────────────────
     -->
     <link
-      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;1,9..40,300&family=Cinzel:wght@400;700&display=swap"
+      href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,400;1,700&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;1,9..40,300;1,9..40,400&family=Cinzel:wght@400;600;700&display=swap"
       rel="stylesheet"
     />
 
-    <title>Schaden's — Cosplay & Anime Shop</title>
+    <!--
+      Open Graph / SEO basics.
+      Fill og:image with a product banner before going live.
+    -->
+    <meta name="description" content="Schaden's Cosplay Shop — premium anime cosplay costumes, accessories, and props. Your next character awaits." />
+    <meta property="og:title" content="Schaden's Cosplay Shop" />
+    <meta property="og:description" content="Premium anime cosplay costumes, accessories, and props." />
+    <meta property="og:type" content="website" />
+
+    <title>Schaden's — Anime &amp; Cosplay Shop</title>
   </head>
   <body>
     <div id="root"></div>

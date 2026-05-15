@@ -1,45 +1,301 @@
+/*
+ * index.css — Schaden's Cosplay Shop
+ * ─────────────────────────────────────────────────────────────────────
+ * Purpose     : Global design tokens, base reset, scroll-motif utilities,
+ *               and typography bindings for Schaden's Cosplay Shop UMS.
+ * Theme       : Ancient Japanese scroll / emaki (絵巻) aesthetic.
+ *               Rice paper grounds, sumi ink text, gilded jiku dowel
+ *               caps, vermillion hanko seals, torii gate accents.
+ * Palette     : Warm parchment surfaces · sumi ink type · violet CTA ·
+ *               vermillion + dark-gold ornament accents.
+ * Typography  : Playfair Display (headlines) · DM Sans (UI/labels) ·
+ *               Cinzel (logo mark only)
+ * Dependencies: Tailwind CSS via @import · Google Fonts in index.html
+ * Usage       : Imported once at src/main.jsx. All --sc-* tokens and
+ *               .sc-* utility classes consumed globally by components.
+ */
+
 @import "tailwindcss";
 
-/*
-  GroundZero Design Tokens
-  ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical
-  Palette : Emerald primary, Olive mid, Warm cream accents
-  Surfaces: Deep forest darks (replaces zinc-950)
-*/
+/* ═══════════════════════════════════════════════════════════════════
+   DESIGN TOKENS
+   Prefix: --sc- (Schaden's Cosplay).
+   Never reference raw hex values inside component files — always
+   use a token so the palette can be updated in one place.
+   ═══════════════════════════════════════════════════════════════════ */
 :root {
-  /* Brand greens */
-  --gz-emerald:     #2d6a4f;   /* primary CTA / active */
-  --gz-emerald-lt:  #40916c;   /* hover state */
-  --gz-emerald-dim: #1b4332;   /* deep bg tint */
-  --gz-olive:       #606c38;   /* secondary accent */
-  --gz-olive-lt:    #8a9a5b;   /* muted labels */
 
-  /* Warm neutrals — replaces zinc */
-  --gz-bark:        #1a1a14;   /* darkest bg (≈ zinc-950) */
-  --gz-soil:        #2a2a1e;   /* card / nav bg */
-  --gz-driftwood:   #4a4a38;   /* borders */
-  --gz-sand:        #c9b99a;   /* body text */
-  --gz-cream:       #f0e6d3;   /* headings / bright text */
+  /* ── Purple CTA Scale ──────────────────────────────────────────── */
+  --sc-purple:        #6d28d9;              /* Primary CTA — deep iris        */
+  --sc-purple-lt:     #8b5cf6;              /* Hover — lighter amethyst        */
+  --sc-purple-dim:    #ede9fe;              /* Tinted bg — pale lavender wash  */
+  --sc-purple-glow:   rgba(109,40,217,0.25); /* Soft glow for shadows          */
 
-  /* Semantic */
-  --gz-danger:      #c1440e;
-  --gz-border:      rgba(96, 108, 56, 0.35);   /* olive border @ 35% */
-  --gz-overlay:     rgba(26, 26, 20, 0.82);
+  /* ── Eastern Accent Colors ─────────────────────────────────────── */
+  --sc-vermillion:    #c0392b;   /* Torii red — hanko seals, required dots  */
+  --sc-vermillion-lt: #e74c3c;   /* Hover vermillion                        */
+  --sc-ink:           #1a1008;   /* Sumi ink — darkest text, headings       */
+  --sc-ink-soft:      #2c2416;   /* Softer ink — secondary headings         */
+  --sc-jade:          #4a7c59;   /* Jade — strength meter "good" state      */
+  --sc-gold:          #b8860b;   /* Dark gold — jiku caps, border hairlines */
+  --sc-gold-lt:       #d4a017;   /* Lighter gold — hover ornament states    */
 
-  /* Font families */
-  --font-display: 'Playfair Display', serif;
-  --font-ui:      'Josefin Sans', sans-serif;
-  --font-body:    'Lato', sans-serif;
+  /* ── Light Surface Scale (washi / rice paper) ──────────────────── */
+  --sc-paper:         #f5f0e8;   /* Base bg — warm rice paper               */
+  --sc-paper-aged:    #ede5d4;   /* Aged paper — scroll body, card surfaces */
+  --sc-paper-shadow:  #ddd0bb;   /* Deeper crease — strength meter empty    */
+  --sc-silk:          #faf7f2;   /* Near-white silk — login card bg         */
+
+  /* ── Text Scale ────────────────────────────────────────────────── */
+  --sc-ash:           #6b5e4e;   /* Warm grey — body text on light bg       */
+  --sc-ash-light:     #9c8c7a;   /* Lighter ash — muted labels, captions    */
+
+  /* ── Semantic Aliases ──────────────────────────────────────────── */
+  --sc-danger:        #c0392b;   /* Destructive actions — vermillion        */
+  --sc-success:       #4a7c59;   /* Confirmation — jade green               */
+  --sc-border:        rgba(109,40,217,0.20); /* Default purple border         */
+  --sc-border-warm:   rgba(184,134,11,0.30); /* Gold border variant           */
+  --sc-border-ink:    rgba(26,16,8,0.12);    /* Ink stroke separator          */
+  --sc-overlay:       rgba(245,240,232,0.92); /* Light overlay                */
+
+  /* ── Typography Stack ──────────────────────────────────────────── */
+  /* Display : Playfair Display — editorial serif, magazine headlines   */
+  /* UI/Label: DM Sans          — clean sans for nav, labels, buttons   */
+  /* Logo    : Cinzel            — all-caps Roman; logo mark only        */
+  --font-display: 'Playfair Display', Georgia, serif;
+  --font-ui:      'DM Sans', system-ui, sans-serif;
+  --font-logo:    'Cinzel', 'Times New Roman', serif;
+  --font-body:    'DM Sans', system-ui, sans-serif;
 }
 
-/* Base reset */
+/* ═══════════════════════════════════════════════════════════════════
+   BASE RESET
+   ═══════════════════════════════════════════════════════════════════ */
+
 *, *::before, *::after { box-sizing: border-box; }
 
 body {
   margin: 0;
-  background-color: var(--gz-bark);
-  color: var(--gz-sand);
+  background-color: var(--sc-paper);
+  color: var(--sc-ash);
   font-family: var(--font-body);
   -webkit-font-smoothing: antialiased;
+  /*
+   * Washi paper texture:
+   * Top-center violet wash — brand ambient light.
+   * Bottom-right gold warmth — aged paper glow.
+   * Vertical fiber lines — kozo washi held to light.
+   */
+  background-image:
+    radial-gradient(
+      ellipse 120% 60% at 50% -10%,
+      rgba(109,40,217,0.05) 0%,
+      transparent 65%
+    ),
+    radial-gradient(
+      ellipse 80% 40% at 90% 100%,
+      rgba(184,134,11,0.06) 0%,
+      transparent 60%
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 120px,
+      rgba(26,16,8,0.013) 120px,
+      rgba(26,16,8,0.013) 121px
+    );
+}
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLLBAR — warm parchment aesthetic
+   ═══════════════════════════════════════════════════════════════════ */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--sc-paper-aged); }
+::-webkit-scrollbar-thumb {
+  background: var(--sc-ash-light);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover { background: var(--sc-purple); }
+
+/* ═══════════════════════════════════════════════════════════════════
+   SCROLL MOTIF UTILITIES
+   Reusable classes that encode the emaki scroll visual language.
+   Use these across pages for consistency — don't re-declare inline.
+   ═══════════════════════════════════════════════════════════════════ */
+
+/*
+ * .sc-jiku — gilded wooden dowel cap (軸)
+ * The rolled end of a makimono scroll. Place above and below
+ * .sc-scroll-body to complete the scroll form.
+ * Gradient top-to-bottom simulates the convex cylinder surface.
+ */
+.sc-jiku {
+  height: 22px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg,
+    #c8a96e 0%,
+    #e8d5a3 35%,
+    #d4b97a 60%,
+    #b8952e 100%
+  );
+  box-shadow:
+    0 -3px  8px rgba(26,16,8,0.18),
+    0  4px 12px rgba(26,16,8,0.22),
+    0  1px  0   rgba(255,245,200,0.60) inset;
+  position: relative;
+  z-index: 2;
+}
+
+/*
+ * .sc-jiku-bottom — bottom dowel variant
+ * Slightly darker gradient — bottom face sits in shadow.
+ */
+.sc-jiku-bottom {
+  height: 22px;
+  border-radius: 9999px;
+  background: linear-gradient(180deg,
+    #b8952e 0%,
+    #d4b97a 30%,
+    #e8d5a3 55%,
+    #c8a96e 80%,
+    #8a6520 100%
+  );
+  box-shadow:
+    0  3px 10px rgba(26,16,8,0.22),
+    0 -2px  6px rgba(26,16,8,0.12),
+    0 -1px  0   rgba(255,245,200,0.40) inset;
+  position: relative;
+  z-index: 2;
+}
+
+/*
+ * .sc-scroll-body — the washi paper surface between the dowels
+ * Apply margin: 0 6px so the dowel caps appear to wrap the edges.
+ */
+.sc-scroll-body {
+  margin: 0 6px;
+  background: var(--sc-paper-aged);
+  border-left:  1px solid rgba(184,134,11,0.25);
+  border-right: 1px solid rgba(184,134,11,0.25);
+  box-shadow:
+    -4px 0 12px rgba(26,16,8,0.06),
+     4px 0 12px rgba(26,16,8,0.06),
+     0   0 40px rgba(26,16,8,0.04) inset;
+  position: relative;
+  z-index: 1;
+}
+
+/*
+ * .sc-ink-rule — brushed horizontal divider
+ * Simulates a sumi ink line drawn across the scroll with a wide brush.
+ * Fades at both ends — ink thins at the start and end of a brushstroke.
+ */
+.sc-ink-rule {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent       0%,
+    var(--sc-border-ink) 20%,
+    var(--sc-border-ink) 80%,
+    transparent      100%
+  );
+}
+
+/*
+ * .sc-gold-rule — gilded decorative rule
+ * Used for header ornaments and section crowns. Brighter than ink-rule.
+ */
+.sc-gold-rule {
+  height: 1px;
+  background: linear-gradient(90deg,
+    transparent          0%,
+    var(--sc-border-warm) 20%,
+    var(--sc-gold)        50%,
+    var(--sc-border-warm) 80%,
+    transparent          100%
+  );
+}
+
+/*
+ * .sc-zassho — formal citation block (雑書)
+ * An inset notation panel on the scroll — used for displaying
+ * quoted text, questions, or referenced content. Left gold border
+ * marks it as cited material distinct from surrounding paper.
+ */
+.sc-zassho {
+  background: var(--sc-paper);
+  border-left: 3px solid var(--sc-gold);
+  padding: 1rem 1.25rem;
+  box-shadow: 2px 2px 8px rgba(26,16,8,0.06) inset;
+}
+
+/*
+ * .sc-hanko-seal — vermillion stamp underline
+ * The red ink impression left by a hanko seal below official actions.
+ * Place immediately after a submit button's containing div.
+ */
+.sc-hanko-seal {
+  height: 3px;
+  background: var(--sc-vermillion);
+  opacity: 0.70;
+  transition: opacity 0.15s;
+}
+
+/*
+ * .sc-mon-ring — circular family crest border (家紋)
+ * Double-ring kamon frame. Place a glyph or SVG inside.
+ */
+.sc-mon-ring {
+  border-radius: 9999px;
+  border: 2px solid var(--sc-gold);
+  outline: 1px solid rgba(184,134,11,0.25);
+  outline-offset: 3px;
+  background: var(--sc-paper);
+  box-shadow: 0 2px 8px rgba(184,134,11,0.15);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/*
+ * .sc-glow — violet CTA glow
+ * Used on primary action buttons for brand emphasis.
+ */
+.sc-glow {
+  box-shadow: 0 0 14px var(--sc-purple-glow), 0 2px 8px rgba(109,40,217,0.12);
+}
+
+/*
+ * .sc-scroll-input — flat underline input for scroll surfaces
+ * No box border — only a bottom stroke, like ink brushed on paper.
+ * Apply to <input> elements within scroll body panels.
+ */
+.sc-scroll-input {
+  background: transparent;
+  border: none;
+  border-bottom: 1.5px solid var(--sc-border-ink);
+  border-radius: 0;
+  outline: none;
+  width: 100%;
+  padding: 0.5rem 0.25rem;
+  color: var(--sc-ink);
+  font-family: var(--font-body);
+  font-size: 0.95rem;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+.sc-scroll-input:focus {
+  border-bottom-color: var(--sc-purple);
+  box-shadow: 0 2px 0 var(--sc-purple-glow);
+}
+
+/*
+ * .sc-panel — standard paper panel (non-scroll pages)
+ * Used on dashboard sections that aren't full scrolls — clean
+ * aged-paper card with ink border and gold inset hairline.
+ */
+.sc-panel {
+  background: var(--sc-silk);
+  border: 1px solid var(--sc-border-ink);
+  box-shadow:
+    0 1px 0 rgba(184,134,11,0.18) inset,
+    0 4px 16px rgba(26,16,8,0.06);
 }
