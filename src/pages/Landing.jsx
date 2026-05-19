@@ -11,24 +11,29 @@ import { Link } from "react-router-dom";
 export default function Landing() {
   return (
     <div
-      className="min-h-screen flex flex-col"
-      style={{ background: "var(--gz-bark)", paddingTop: "4.5rem" }}
+      className="flex flex-col"
+      style={{
+        background: "var(--gz-bark)",
+        paddingTop: "4.5rem",
+        height: "100dvh",
+      }}
     >
-      <div className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-6">
+      <div className="flex-1 max-w-7xl mx-auto w-full px-4 md:px-8 py-6 min-h-0">
         {/* ── MOBILE: flex-col stack / DESKTOP: bento grid ── */}
         <div
-          className="flex flex-col md:grid gap-3 h-full"
+          className="flex flex-col md:grid gap-3"
           style={{
             gridTemplateColumns: "repeat(12, 1fr)",
-            gridTemplateRows: "auto",
+            gridTemplateRows: "1fr 1fr auto",
+            height: "100%",
           }}
         >
-          {/* ── CELL 1: BG IMAGE HERO ── */}
+          {/* ── CELL 1: BG IMAGE HERO — vertical left column, spans all 3 rows ── */}
           <div
             className="relative rounded-2xl overflow-hidden order-1"
             style={{
-              gridColumn: "1 / 8",
-              gridRow: "1 / 3",
+              gridColumn: "1 / 6",
+              gridRow: "1 / 4",
               minHeight: "260px",
               backgroundImage: "url('/background.jpg')",
               backgroundSize: "cover",
@@ -53,7 +58,7 @@ export default function Landing() {
                   backdropFilter: "blur(6px)",
                 }}
               >
-                Est. 2026 · Cebu City
+                Est. 2026
               </span>
             </div>
           </div>
@@ -62,7 +67,7 @@ export default function Landing() {
           <div
             className="rounded-2xl flex flex-col justify-center px-6 py-6 order-2"
             style={{
-              gridColumn: "8 / 13",
+              gridColumn: "6 / 13",
               gridRow: "1 / 2",
               background: "var(--gz-emerald-dim)",
               border: "1px solid var(--gz-border)",
@@ -98,7 +103,7 @@ export default function Landing() {
           <div
             className="rounded-2xl flex flex-col justify-between px-6 py-6 order-3"
             style={{
-              gridColumn: "8 / 13",
+              gridColumn: "6 / 13",
               gridRow: "2 / 3",
               background: "var(--gz-soil)",
               border: "1px solid var(--gz-driftwood)",
@@ -120,7 +125,7 @@ export default function Landing() {
           <div
             className="rounded-2xl flex flex-col justify-center items-center px-6 py-6 gap-3 order-4"
             style={{
-              gridColumn: "1 / 5",
+              gridColumn: "6 / 9",
               gridRow: "3 / 4",
               background: "var(--gz-emerald)",
               border: "1px solid var(--gz-emerald-lt)",
@@ -163,7 +168,7 @@ export default function Landing() {
           <div
             className="rounded-2xl flex flex-col justify-center items-center px-6 py-6 gap-3 order-5"
             style={{
-              gridColumn: "5 / 9",
+              gridColumn: "9 / 11",
               gridRow: "3 / 4",
               background: "var(--gz-soil)",
               border: "1px solid var(--gz-driftwood)",
@@ -205,7 +210,7 @@ export default function Landing() {
           <div
             className="rounded-2xl flex items-center justify-between px-6 py-4 order-6"
             style={{
-              gridColumn: "9 / 13",
+              gridColumn: "11 / 13",
               gridRow: "3 / 4",
               background: "var(--gz-soil)",
               border: "1px solid var(--gz-driftwood)",
