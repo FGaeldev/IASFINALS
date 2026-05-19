@@ -4,9 +4,9 @@ import useAuth from "../hooks/useAuth";
 import { logout } from "../services/authService";
 
 /*
-  Navbar.jsx — GroundZero
+  Navbar.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — floating pill
+  Theme   : Industrial Gym — floating pill
   Fix     : Mobile dropdown moved OUTSIDE pointerEvents:none wrapper
             so clicks register correctly
   Fonts   : Playfair Display (logo) · Josefin Sans (links)
@@ -66,7 +66,7 @@ export default function Navbar() {
               opacity: 0.6,
             }}
           >
-            UMS
+            GYM
           </span>
         </NavLink>
 

@@ -1,9 +1,9 @@
 import { Link } from "react-router-dom";
 
 /*
-  Landing.jsx — GroundZero
+  Landing.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — Bento Grid Layout
+  Theme   : Industrial Gym — Bento Grid Layout
   Mobile  : Single column stack — grid collapses to flex-col
   Palette : --gz-* tokens from index.css
   Fonts   : Playfair Display (brand) · Josefin Sans (labels) · Lato (body)
@@ -53,7 +53,7 @@ export default function Landing() {
                   backdropFilter: "blur(6px)",
                 }}
               >
-                Est. 2026
+                Est. 2026 · Cebu City
               </span>
             </div>
           </div>
@@ -75,7 +75,7 @@ export default function Landing() {
                 color: "var(--gz-olive-lt)",
               }}
             >
-              Spirits &amp; Distribution
+              Fitness &amp; Training
             </p>
             <h1
               className="leading-none uppercase"
@@ -112,7 +112,7 @@ export default function Landing() {
                 opacity: 0.85,
               }}
             >
-              Where every bottle finds its home.
+              Where every rep builds a better you.
             </p>
           </div>
 
@@ -155,7 +155,7 @@ export default function Landing() {
                 (e.currentTarget.style.background = "var(--gz-emerald-dim)")
               }
             >
-              Enter the Cellar
+              Enter the Gym
             </Link>
           </div>
 
@@ -176,7 +176,7 @@ export default function Landing() {
                 color: "var(--gz-olive-lt)",
               }}
             >
-              New distributor?
+              New member?
             </p>
             <Link
               to="/signup"
@@ -197,7 +197,7 @@ export default function Landing() {
                 (e.currentTarget.style.borderColor = "var(--gz-border)")
               }
             >
-              Join the Network
+              Join the Gym
             </Link>
           </div>
 

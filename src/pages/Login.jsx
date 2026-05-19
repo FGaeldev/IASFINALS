@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { login } from "../services/authService";
 
 /*
-  Login.jsx — GroundZero
+  Login.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — Bento-card login form
+  Theme   : Industrial Gym — Bento-card login form
   Layout  : Centered single card, solid surface, no raw bg text
   Palette : --gz-* tokens from index.css
   Fonts   : Playfair Display (heading) · Josefin Sans (labels/btn) · Lato (inputs/body)
@@ -107,7 +107,7 @@ export default function Login() {
             opacity: 0.6,
           }}
         >
-          Sign in to your account
+          Sign in to your membership
         </p>
 
         {/* ── FORM ── */}

@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { getProfile, update2fa, changePassword } from "../services/authService";
 
 /*
-  UserDashboard.jsx — GroundZero
+  UserDashboard.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — Bento card layout
+  Theme   : Industrial Gym — Bento card layout
   Logic   : Unchanged — getProfile, update2fa, changePassword
   Sections: Email identity · Password (inline edit) · 2FA (inline edit)
   Palette : --gz-* tokens from index.css
@@ -164,7 +164,7 @@ export default function UserDashboard() {
             opacity: 0.55,
           }}
         >
-          Your account settings
+          Your membership settings
         </p>
 
         {/* ── BENTO: EMAIL IDENTITY ── */}

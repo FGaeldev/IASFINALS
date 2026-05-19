@@ -2,9 +2,9 @@ import { useState, useEffect } from "react";
 import { verify2fa, getSecurityQuestion } from "../services/authService";
 
 /*
-  SecurityQuestion.jsx — GroundZero
+  SecurityQuestion.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — Bento-card 2FA verify form
+  Theme   : Industrial Gym — Bento-card 2FA verify form
   Logic   : Unchanged — fetches question/hint on mount, submits verify2fa()
             Redirects to /admin or /user based on role
   Palette : --gz-* tokens from index.css

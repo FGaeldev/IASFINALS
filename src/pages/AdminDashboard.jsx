@@ -8,9 +8,9 @@ import {
 } from "../services/authService";
 
 /*
-  AdminDashboard.jsx — GroundZero
+  AdminDashboard.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical
+  Theme   : Industrial Gym
   Layout  : Sidebar (left rail) + main content
   Mobile  : Sidebar hidden by default — slide-in drawer on toggle
             Overlay closes drawer on tap-outside
@@ -18,9 +18,9 @@ import {
 */
 
 const TABS = [
-  { value: "users", label: "Registry", icon: "⬡" },
-  { value: "logs", label: "Entry Logs", icon: "⊟" },
-  { value: "sessions", label: "Watch", icon: "◎" },
+  { value: "users", label: "Members", icon: "⬡" },
+  { value: "logs", label: "Access Logs", icon: "⊟" },
+  { value: "sessions", label: "Active Sessions", icon: "◎" },
 ];
 
 export default function AdminDashboard() {
@@ -42,7 +42,7 @@ export default function AdminDashboard() {
 
   const stats = [
     {
-      label: "Total Users",
+      label: "Total Members",
       value: users.length,
       accent: "var(--gz-emerald-lt)",
     },
@@ -105,7 +105,7 @@ export default function AdminDashboard() {
             marginBottom: "0.3rem",
           }}
         >
-          Command Center
+          Admin Panel
         </p>
         <p
           style={{
@@ -117,7 +117,7 @@ export default function AdminDashboard() {
             color: "var(--gz-cream)",
           }}
         >
-          Registry
+          Members
         </p>
       </div>
 
@@ -206,7 +206,7 @@ export default function AdminDashboard() {
             opacity: 0.5,
           }}
         >
-          GroundZero UMS
+          GroundZero Fitness
         </p>
       </div>
     </>
@@ -275,7 +275,7 @@ export default function AdminDashboard() {
                 color: "var(--gz-olive-lt)",
               }}
             >
-              Command Center
+              Admin Panel
             </p>
             <p
               style={{

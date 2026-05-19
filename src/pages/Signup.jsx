@@ -3,9 +3,9 @@ import { Link } from "react-router-dom";
 import { signup } from "../services/authService";
 
 /*
-  Signup.jsx — GroundZero
+  Signup.jsx — GroundZero Fitness
   ─────────────────────────────────────────────────────────────────────
-  Theme   : Homely / Tropical — Bento-card signup form
+  Theme   : Industrial Gym — Bento-card signup form
   Palette : --gz-* tokens from index.css
   Fonts   : Playfair Display (heading) · Josefin Sans (labels/btn) · Lato (inputs)
   Keys    : Match authService.signup() — email, password, security_question,
@@ -148,7 +148,7 @@ export default function Signup() {
             color: "var(--gz-cream)",
           }}
         >
-          Join the Network
+          Join the Gym
         </h1>
         <p
           className="text-center italic mb-8"
@@ -159,7 +159,7 @@ export default function Signup() {
             opacity: 0.6,
           }}
         >
-          Create your distributor account
+          Create your member account
         </p>
 
         {/* ── FORM ── */}
