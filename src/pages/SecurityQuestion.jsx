@@ -1,3 +1,21 @@
+/**
+ * @file pages/SecurityQuestion.jsx
+ * @description Step 2 of the 2FA login flow — security question verification.
+ *
+ * Fetches the user's security question from the server on mount and prompts
+ * them to enter their answer. Requires an active `pending_user` session
+ * (set by a successful Step 1 password login); redirects to /login otherwise.
+ *
+ * bfcache defense:
+ *   The browser's back/forward cache (bfcache) can restore this page after
+ *   logout without re-running useEffect, leaving stale form state visible.
+ *   A `pageshow` event listener detects bfcache restores (event.persisted)
+ *   and immediately redirects to /login, preventing the stale page from
+ *   being interacted with.
+ *
+ * @dependencies authService (verify2fa, getSecurityQuestion)
+ */
+
 import { useState, useEffect } from "react";
 import { verify2fa, getSecurityQuestion } from "../services/authService";
 
@@ -19,17 +37,39 @@ export default function SecurityQuestion() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
 
-  /* Fetch question on mount — redirect to /login if no pending session */
   useEffect(() => {
+    // Fetch the security question on mount.
+    // If no pending_user session exists server-side, redirect to login.
     getSecurityQuestion().then((res) => {
       if (res.success) {
         setQuestion(res.data.question);
         setHint(res.data.hint);
       } else {
-        window.location.href = "/login";
+        // No pending session — user navigated here directly or session expired.
+        window.location.replace("/login");
       }
       setLoading(false);
     });
+
+    /**
+     * bfcache defense: the browser can restore this page from its back/forward
+     * cache after the user logs out, skipping useEffect entirely and leaving
+     * the previous form state visible. `event.persisted` is true specifically
+     * when the page is being restored from bfcache (not a normal load).
+     * Redirecting in this case ensures the user always hits a fresh session check.
+     */
+    const handlePageShow = (event) => {
+      if (event.persisted) {
+        window.location.replace("/login");
+      }
+    };
+
+    window.addEventListener("pageshow", handlePageShow);
+
+    // Cleanup listener on unmount to avoid memory leaks.
+    return () => {
+      window.removeEventListener("pageshow", handlePageShow);
+    };
   }, []);
 
   const handleSubmit = async (e) => {
@@ -40,9 +80,11 @@ export default function SecurityQuestion() {
     setSubmitting(false);
     if (res.success) {
       const role = res.data.role;
-      if (role === "admin") window.location.href = "/admin";
-      else if (role === "user") window.location.href = "/user";
-      else window.location.href = "/";
+      // Use replace() so the 2FA page is not reachable via back button
+      // after successfully logging in.
+      if (role === "admin") window.location.replace("/admin");
+      else if (role === "user") window.location.replace("/user");
+      else window.location.replace("/");
     } else {
       setError(res.message);
     }

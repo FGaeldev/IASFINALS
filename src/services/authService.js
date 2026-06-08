@@ -10,7 +10,7 @@
  * @note Update API_URL before deploying to production.
  */
 
-const API_URL = "https://ventura.augusta2026.online/server/index.php"; // TODO: always update for production
+const API_URL = "https://groundzero.augusta2026.online/server/index.php"; // TODO: always update for production
 
 // ============================================================
 // AUTH

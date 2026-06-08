@@ -34,6 +34,13 @@ header("Access-Control-Allow-Credentials: true");
 header("Access-Control-Allow-Methods: GET, POST, OPTIONS");
 header("Access-Control-Allow-Headers: Content-Type");
 
+// Prevent the browser and any intermediate caches from storing API responses.
+// Without this, browsers may restore a cached authenticated response from
+// bfcache (back/forward cache) after logout, making protected data appear
+// accessible even though the session has been destroyed server-side.
+header("Cache-Control: no-store, no-cache, must-revalidate");
+header("Pragma: no-cache"); // HTTP/1.0 compatibility
+
 // Handle CORS preflight — browsers send OPTIONS before credentialed POST requests
 if ($_SERVER["REQUEST_METHOD"] === "OPTIONS") {
     http_response_code(200);

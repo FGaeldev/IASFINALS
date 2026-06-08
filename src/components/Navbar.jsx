@@ -17,7 +17,13 @@ export default function Navbar() {
 
   const handleLogout = async () => {
     const res = await logout();
-    if (res.success) window.location.href = "/login";
+    if (res.success) {
+      // Use replace() instead of href assignment so the browser removes the
+      // current protected page from the history stack entirely. This prevents
+      // the user from navigating back to a cached version of the dashboard
+      // after logout via the browser's back button.
+      window.location.replace("/login");
+    }
   };
 
   return (
